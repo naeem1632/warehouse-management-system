@@ -1,0 +1,115 @@
+/* Login Page Styles */
+.login-page {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+
+.login-page .card {
+    border-radius: 1rem;
+    backdrop-filter: blur(10px);
+}
+
+.login-page .card-body {
+    padding: 2rem;
+}
+
+.login-page h2 {
+    color: #212529;
+}
+
+.login-page .text-primary {
+    color: #667eea !important;
+}
+
+.login-page .form-control {
+    border-radius: 0.5rem;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.login-page .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.login-page .input-group-text {
+    border-radius: 0 0.5rem 0.5rem 0;
+    border: 2px solid #e9ecef;
+    border-left: none;
+    background-color: #fff;
+}
+
+.login-page .btn-outline-secondary {
+    border: 2px solid #e9ecef;
+    border-left: none;
+}
+
+.login-page .btn-outline-secondary:hover {
+    background-color: #f8f9fa;
+    border-color: #e9ecef;
+    color: #212529;
+}
+
+.login-page .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    padding: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.login-page .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(102, 126, 234, 0.3);
+}
+
+.login-page .form-check-input:checked {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+.login-page .alert {
+    border-radius: 0.5rem;
+    border: none;
+}
+
+.login-page .bg-light {
+    background-color: #f8f9fa !important;
+    border-radius: 0.5rem;
+}
+
+/* Icon animation */
+.login-page .bi-building {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 576px) {
+    .login-page .card-body {
+        padding: 1.5rem;
+    }
+
+    .login-page h2 {
+        font-size: 1.5rem;
+    }
+
+    .login-page .bi-building {
+        font-size: 2.5rem !important;
+    }
+}
+
+/* Loading state */
+.login-page .btn-primary:disabled {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    opacity: 0.65;
+}

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/main :: main(content=~{::content}, customCss=~{}, customJs=~{})}">
+<body>
+    <th:block th:fragment="content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h1>
+                        <i class="bi bi-person"></i>
+                        <span th:text="${isEdit ? 'Edit User' : 'Add New User'}">Add New User</span>
+                    </h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a th:href="@{/users}">Users</a></li>
+                            <li class="breadcrumb-item active" aria-current="page" th:text="${isEdit ? 'Edit' : 'Add New'}">Add New</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12 col-lg-8 col-xl-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-card-text"></i>
+                            <span th:text="${isEdit ? 'User Details' : 'New User Information'}">User Information</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="${isEdit ? '/users/' + userDTO.id : '/users'}"
+                              th:object="${userDTO}"
+                              method="post"
+                              class="needs-validation"
+                              novalidate>
+
+                            <!-- Name Field -->
+                            <div class="mb-3">
+                                <label for="name" class="form-label">
+                                    <i class="bi bi-person-fill"></i> Full Name <span class="text-danger">*</span>
+                                </label>
+                                <input type="text"
+                                       class="form-control"
+                                       th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
+                                       id="name"
+                                       th:field="*{name}"
+                                       placeholder="Enter full name"
+                                       required>
+                                <div class="invalid-feedback" th:errors="*{name}">Name is required</div>
+                            </div>
+
+                            <!-- Email Field -->
+                            <div class="mb-3">
+                                <label for="email" class="form-label">
+                                    <i class="bi bi-envelope-fill"></i> Email Address <span class="text-danger">*</span>
+                                </label>
+                                <input type="email"
+                                       class="form-control"
+                                       th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'"
+                                       id="email"
+                                       th:field="*{email}"
+                                       placeholder="Enter email address"
+                                       required>
+                                <div class="invalid-feedback" th:errors="*{email}">Email is required</div>
+                            </div>
+
+                            <!-- Password Field -->
+                            <div class="mb-3">
+                                <label for="password" class="form-label">
+                                    <i class="bi bi-lock-fill"></i> Password
+                                    <span class="text-danger" th:if="${!isEdit}">*</span>
+                                    <span class="text-muted small" th:if="${isEdit}">(leave blank to keep current password)</span>
+                                </label>
+                                <div class="input-group">
+                                    <input type="password"
+                                           class="form-control"
+                                           th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
+                                           id="password"
+                                           th:field="*{password}"
+                                           placeholder="Enter password"
+                                           th:required="${!isEdit}">
+                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                        <i class="bi bi-eye" id="toggleIcon"></i>
+                                    </button>
+                                </div>
+                                <div class="invalid-feedback" th:errors="*{password}">Password is required</div>
+                                <small class="form-text text-muted">
+                                    Password must be at least 6 characters long
+                                </small>
+                            </div>
+
+                            <!-- Phone Field -->
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">
+                                    <i class="bi bi-telephone-fill"></i> Phone Number
+                                </label>
+                                <input type="tel"
+                                       class="form-control"
+                                       id="phone"
+                                       th:field="*{phone}"
+                                       placeholder="Enter phone number">
+                            </div>
+
+                            <!-- Role Field -->
+                            <div class="mb-3">
+                                <label for="role" class="form-label">
+                                    <i class="bi bi-award-fill"></i> Role <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select"
+                                        th:classappend="${#fields.hasErrors('role')} ? 'is-invalid'"
+                                        id="role"
+                                        th:field="*{role}"
+                                        required>
+                                    <option value="">Select role</option>
+                                    <option th:each="role : ${roles}"
+                                            th:value="${role}"
+                                            th:text="${#strings.replace(role.name(), '_', ' ')}">
+                                        Role
+                                    </option>
+                                </select>
+                                <div class="invalid-feedback" th:errors="*{role}">Role is required</div>
+                                <small class="form-text text-muted">
+                                    <strong>Admin:</strong> Full system access |
+                                    <strong>Warehouse Manager:</strong> Manage assigned warehouse |
+                                    <strong>Staff:</strong> Limited access
+                                </small>
+                            </div>
+
+                            <!-- Status Field -->
+                            <div class="mb-4">
+                                <label for="status" class="form-label">
+                                    <i class="bi bi-toggle-on"></i> Status <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select"
+                                        th:classappend="${#fields.hasErrors('status')} ? 'is-invalid'"
+                                        id="status"
+                                        th:field="*{status}"
+                                        required>
+                                    <option value="">Select status</option>
+                                    <option th:each="status : ${statuses}"
+                                            th:value="${status}"
+                                            th:text="${status.name()}">
+                                        Status
+                                    </option>
+                                </select>
+                                <div class="invalid-feedback" th:errors="*{status}">Status is required</div>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="d-flex justify-content-between">
+                                <a th:href="@{/users}" class="btn btn-secondary">
+                                    <i class="bi bi-x-circle"></i> Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle"></i>
+                                    <span th:text="${isEdit ? 'Update User' : 'Create User'}">Submit</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help Card -->
+            <div class="col-12 col-lg-4 col-xl-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-info-circle"></i> Help</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>User Roles</h6>
+                        <ul class="small">
+                            <li><strong>Admin:</strong> Has complete access to all system features and can manage all warehouses, users, and settings.</li>
+                            <li><strong>Warehouse Manager:</strong> Can manage operations for assigned warehouses including stock, purchases, and sales.</li>
+                            <li><strong>Staff:</strong> Has limited access to view information and perform basic operations.</li>
+                        </ul>
+
+                        <h6 class="mt-3">Password Requirements</h6>
+                        <ul class="small">
+                            <li>Minimum 6 characters</li>
+                            <li>Use a strong, unique password</li>
+                            <li>Passwords are encrypted using BCrypt</li>
+                        </ul>
+
+                        <div class="alert alert-warning small mt-3" role="alert">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <strong>Note:</strong> When editing a user, leave the password field blank if you don't want to change it.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Form validation
+            (function () {
+                'use strict'
+                var forms = document.querySelectorAll('.needs-validation')
+                Array.prototype.slice.call(forms).forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+            })()
+
+            // Toggle password visibility
+            document.getElementById('togglePassword').addEventListener('click', function () {
+                const passwordInput = document.getElementById('password');
+                const toggleIcon = document.getElementById('toggleIcon');
+
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    toggleIcon.classList.remove('bi-eye');
+                    toggleIcon.classList.add('bi-eye-slash');
+                } else {
+                    passwordInput.type = 'password';
+                    toggleIcon.classList.remove('bi-eye-slash');
+                    toggleIcon.classList.add('bi-eye');
+                }
+            });
+        </script>
+    </th:block>
+</body>
+</html>
