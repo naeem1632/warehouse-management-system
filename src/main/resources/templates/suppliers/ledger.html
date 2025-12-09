@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/main :: main(content=~{::content}, customCss=~{}, customJs=~{::customJs})}">
+<body>
+    <th:block th:fragment="content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h1><i class="bi bi-journal-text"></i> Supplier Ledger</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a th:href="@{/suppliers}">Suppliers</a></li>
+                            <li class="breadcrumb-item active">Ledger</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div class="col-auto">
+                    <a th:href="@{/suppliers}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to Suppliers
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Supplier Info -->
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <h6 class="text-muted mb-1">Supplier Code</h6>
+                        <p class="mb-0" th:text="${supplier.code}"></p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted mb-1">Supplier Name</h6>
+                        <p class="mb-0" th:text="${supplier.name}"></p>
+                    </div>
+                    <div class="col-md-2">
+                        <h6 class="text-muted mb-1">Phone</h6>
+                        <p class="mb-0" th:text="${supplier.phone}"></p>
+                    </div>
+                    <div class="col-md-3">
+                        <h6 class="text-muted mb-1">Current Balance</h6>
+                        <p class="mb-0">
+                            <span th:if="${supplier.currentBalanceType?.name() == 'DEBIT'}" class="text-danger fw-bold">
+                                Dr. <span th:text="${#numbers.formatDecimal(supplier.currentBalance, 1, 2)}"></span>
+                            </span>
+                            <span th:if="${supplier.currentBalanceType?.name() == 'CREDIT'}" class="text-success fw-bold">
+                                Cr. <span th:text="${#numbers.formatDecimal(supplier.currentBalance, 1, 2)}"></span>
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Date Filter -->
+        <div class="card mb-3">
+            <div class="card-body">
+                <form th:action="@{/suppliers/{id}/ledger(id=${supplier.id})}" method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" name="startDate" th:value="${startDate}" class="form-control">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">End Date</label>
+                        <input type="date" name="endDate" th:value="${endDate}" class="form-control">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-funnel"></i> Filter
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Ledger Table -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Transaction History</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Reference</th>
+                                <th class="text-end">Debit</th>
+                                <th class="text-end">Credit</th>
+                                <th class="text-end">Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(ledger)}">
+                                <td colspan="6" class="text-center py-4 text-muted">
+                                    <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                                    <p class="mb-0 mt-2">No transactions found</p>
+                                </td>
+                            </tr>
+                            <tr th:each="entry : ${ledger}">
+                                <td th:text="${#temporals.format(entry.transactionDate, 'dd-MMM-yyyy')}"></td>
+                                <td th:text="${entry.description}"></td>
+                                <td>
+                                    <span th:if="${entry.referenceType != null}">
+                                        <small class="text-muted" th:text="${entry.referenceType}"></small>
+                                        <span th:if="${entry.referenceId != null}">
+                                            #<span th:text="${entry.referenceId}"></span>
+                                        </span>
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <span th:if="${entry.debit != null && entry.debit > 0}" th:text="${#numbers.formatDecimal(entry.debit, 1, 2)}"></span>
+                                    <span th:if="${entry.debit == null || entry.debit == 0}">-</span>
+                                </td>
+                                <td class="text-end">
+                                    <span th:if="${entry.credit != null && entry.credit > 0}" th:text="${#numbers.formatDecimal(entry.credit, 1, 2)}"></span>
+                                    <span th:if="${entry.credit == null || entry.credit == 0}">-</span>
+                                </td>
+                                <td class="text-end">
+                                    <span th:if="${entry.balanceType?.name() == 'DEBIT'}" class="text-danger">
+                                        Dr. <span th:text="${#numbers.formatDecimal(entry.balance, 1, 2)}"></span>
+                                    </span>
+                                    <span th:if="${entry.balanceType?.name() == 'CREDIT'}" class="text-success">
+                                        Cr. <span th:text="${#numbers.formatDecimal(entry.balance, 1, 2)}"></span>
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </th:block>
+
+    <th:block th:fragment="customJs">
+        <script>
+        </script>
+    </th:block>
+</body>
+</html>

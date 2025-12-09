@@ -11,4 +11,7 @@
     <!-- Product and Stock Management -->
     <include file="db/changelog/changes/002-create-product-and-stock-tables.xml"/>
 
+    <!-- Supplier and Purchase Management -->
+    <include file="db/changelog/changes/003-create-supplier-and-purchase-tables.xml"/>
+
 </databaseChangeLog>

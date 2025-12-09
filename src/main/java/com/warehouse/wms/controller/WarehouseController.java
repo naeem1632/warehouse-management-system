@@ -48,6 +48,7 @@ public class WarehouseController {
     public String showCreateForm(Model model) {
         model.addAttribute("warehouseDTO", new WarehouseDTO());
         model.addAttribute("statuses", WarehouseStatus.values());
+        model.addAttribute("isEdit", false);
         model.addAttribute("pageTitle", "Add New Warehouse");
         model.addAttribute("activePage", "warehouses");
         return "warehouses/form";
@@ -62,6 +63,7 @@ public class WarehouseController {
 
         if (result.hasErrors()) {
             model.addAttribute("statuses", WarehouseStatus.values());
+            model.addAttribute("isEdit", false);
             model.addAttribute("pageTitle", "Add New Warehouse");
             model.addAttribute("activePage", "warehouses");
             return "warehouses/form";
@@ -74,6 +76,7 @@ public class WarehouseController {
         } catch (RuntimeException e) {
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("statuses", WarehouseStatus.values());
+            model.addAttribute("isEdit", false);
             model.addAttribute("pageTitle", "Add New Warehouse");
             model.addAttribute("activePage", "warehouses");
             return "warehouses/form";

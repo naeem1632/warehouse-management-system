@@ -200,12 +200,13 @@
                     </div>
                     <div class="card-body">
                         <p class="small text-muted mb-2">
-                            <strong>Operating Since:</strong>
-                            <span th:text="${#temporals.daysBetween(warehouse.createdAt, #temporals.createNow())}">0</span> days
+                            <strong>Created On:</strong>
+                            <span th:text="${#temporals.format(warehouse.createdAt, 'MMMM dd, yyyy')}">Date</span>
                         </p>
                         <p class="small text-muted mb-0">
-                            <strong>Warehouse Age:</strong>
-                            <span th:text="${#temporals.daysBetween(warehouse.createdAt, #temporals.createNow()) / 30}">0</span> months
+                            <strong>Status:</strong>
+                            <span th:classappend="${warehouse.status.name() == 'ACTIVE'} ? 'text-success' : 'text-secondary'"
+                                  th:text="${warehouse.status.name() == 'ACTIVE' ? 'Operational' : 'Inactive'}">Status</span>
                         </p>
                     </div>
                 </div>

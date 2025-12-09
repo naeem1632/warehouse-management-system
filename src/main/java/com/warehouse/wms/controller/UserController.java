@@ -50,6 +50,7 @@ public class UserController {
         model.addAttribute("userDTO", new UserDTO());
         model.addAttribute("roles", UserRole.values());
         model.addAttribute("statuses", UserStatus.values());
+        model.addAttribute("isEdit", false);
         model.addAttribute("pageTitle", "Add New User");
         model.addAttribute("activePage", "users");
         return "users/form";
@@ -65,6 +66,7 @@ public class UserController {
         if (result.hasErrors()) {
             model.addAttribute("roles", UserRole.values());
             model.addAttribute("statuses", UserStatus.values());
+            model.addAttribute("isEdit", false);
             model.addAttribute("pageTitle", "Add New User");
             model.addAttribute("activePage", "users");
             return "users/form";
@@ -78,6 +80,7 @@ public class UserController {
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("roles", UserRole.values());
             model.addAttribute("statuses", UserStatus.values());
+            model.addAttribute("isEdit", false);
             model.addAttribute("pageTitle", "Add New User");
             model.addAttribute("activePage", "users");
             return "users/form";

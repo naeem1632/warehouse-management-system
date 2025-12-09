@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/main :: main(content=~{::content}, customCss=~{}, customJs=~{::customJs})}">
+<body>
+    <th:block th:fragment="content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h1><i class="bi bi-truck"></i> Supplier Management</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Suppliers</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div class="col-auto">
+                    <a th:href="@{/suppliers/create}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Add New Supplier
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i> <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle"></i> <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Suppliers Table -->
+        <div class="card">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h5 class="mb-0">All Suppliers (<span th:text="${totalItems}">0</span>)</h5>
+                    </div>
+                    <div class="col-auto">
+                        <form th:action="@{/suppliers}" method="get" class="d-flex">
+                            <input type="text" name="keyword" th:value="${keyword}" class="form-control me-2" placeholder="Search suppliers...">
+                            <button class="btn btn-outline-secondary" type="submit">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Code</th>
+                                <th>Name</th>
+                                <th>Business Type</th>
+                                <th>Contact Person</th>
+                                <th>Phone</th>
+                                <th>Current Balance</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(suppliers)}">
+                                <td colspan="8" class="text-center py-4 text-muted">
+                                    <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                                    <p class="mb-0 mt-2">No suppliers found</p>
+                                </td>
+                            </tr>
+                            <tr th:each="supplier : ${suppliers}">
+                                <td><strong th:text="${supplier.code}"></strong></td>
+                                <td th:text="${supplier.name}"></td>
+                                <td th:text="${supplier.businessType?.displayName}"></td>
+                                <td th:text="${supplier.contactPerson}"></td>
+                                <td th:text="${supplier.phone}"></td>
+                                <td>
+                                    <span th:if="${supplier.currentBalanceType?.name() == 'DEBIT'}" class="text-danger">
+                                        Dr. <span th:text="${#numbers.formatDecimal(supplier.currentBalance, 1, 2)}"></span>
+                                    </span>
+                                    <span th:if="${supplier.currentBalanceType?.name() == 'CREDIT'}" class="text-success">
+                                        Cr. <span th:text="${#numbers.formatDecimal(supplier.currentBalance, 1, 2)}"></span>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span th:if="${supplier.status == 'ACTIVE'}" class="badge bg-success">Active</span>
+                                    <span th:if="${supplier.status == 'INACTIVE'}" class="badge bg-secondary">Inactive</span>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a th:href="@{/suppliers/{id}(id=${supplier.id})}" class="btn btn-outline-info" title="View">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a th:href="@{/suppliers/{id}/ledger(id=${supplier.id})}" class="btn btn-outline-primary" title="Ledger">
+                                            <i class="bi bi-journal-text"></i>
+                                        </a>
+                                        <a th:href="@{/suppliers/{id}/edit(id=${supplier.id})}" class="btn btn-outline-warning" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <form th:action="@{/suppliers/{id}/delete(id=${supplier.id})}" method="post" style="display:inline;">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete"
+                                                    onclick="return confirm('Are you sure you want to delete this supplier?')">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="card-footer" th:if="${totalPages > 1}">
+                <nav>
+                    <ul class="pagination justify-content-center mb-0">
+                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                            <a class="page-link" th:href="@{/suppliers(page=${currentPage - 1}, keyword=${keyword})}">Previous</a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                            th:classappend="${i == currentPage} ? 'active'">
+                            <a class="page-link" th:href="@{/suppliers(page=${i}, keyword=${keyword})}" th:text="${i + 1}"></a>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                            <a class="page-link" th:href="@{/suppliers(page=${currentPage + 1}, keyword=${keyword})}">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </th:block>
+
+    <th:block th:fragment="customJs">
+        <script>
+        </script>
+    </th:block>
+</body>
+</html>

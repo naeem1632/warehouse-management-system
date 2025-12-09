@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/main :: main(content=~{::content}, customCss=~{}, customJs=~{::customJs})}">
+<body>
+    <th:block th:fragment="content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h1>
+                        <i class="bi bi-cart-plus"></i>
+                        <span th:text="${purchase.id != null} ? 'Edit Purchase' : 'New Purchase'"></span>
+                    </h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a th:href="@{/purchases}">Purchases</a></li>
+                            <li class="breadcrumb-item active" th:text="${purchase.id != null} ? 'Edit' : 'New'"></li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Messages -->
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle"></i> <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Purchase Form -->
+        <form th:action="${purchase.id != null} ? @{/purchases/{id}(id=${purchase.id})} : @{/purchases}"
+              method="post" th:object="${purchase}" id="purchaseForm">
+            <div class="row">
+                <div class="col-lg-8">
+                    <!-- Purchase Details -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-info-circle"></i> Purchase Details</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Purchase Date *</label>
+                                    <input type="date" class="form-control" th:field="*{purchaseDate}" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Supplier *</label>
+                                    <select class="form-select" th:field="*{supplierId}" required>
+                                        <option value="">Select Supplier</option>
+                                        <option th:each="supplier : ${suppliers}"
+                                                th:value="${supplier.id}"
+                                                th:text="${supplier.code + ' - ' + supplier.name}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Warehouse *</label>
+                                    <select class="form-select" th:field="*{warehouseId}" required>
+                                        <option value="">Select Warehouse</option>
+                                        <option th:each="warehouse : ${warehouses}"
+                                                th:value="${warehouse.id}"
+                                                th:text="${warehouse.name}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Supplier Invoice #</label>
+                                    <input type="text" class="form-control" th:field="*{supplierInvoiceNumber}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vehicle Information -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-truck"></i> Vehicle Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Vehicle Number</label>
+                                    <input type="text" class="form-control" th:field="*{vehicleNumber}">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Driver Name</label>
+                                    <input type="text" class="form-control" th:field="*{driverName}">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Driver Phone</label>
+                                    <input type="text" class="form-control" th:field="*{driverPhone}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Weight Information -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-speedometer2"></i> Weight Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Gross Weight (kg)</label>
+                                    <input type="number" step="0.001" class="form-control" th:field="*{grossWeight}">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Tare Weight (kg)</label>
+                                    <input type="number" step="0.001" class="form-control" th:field="*{tareWeight}">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Net Weight (kg)</label>
+                                    <input type="number" step="0.001" class="form-control" th:field="*{netWeight}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Purchase Items -->
+                    <div class="card mb-3" th:if="${purchase.id == null}">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="bi bi-list-ul"></i> Purchase Items</h5>
+                            <button type="button" class="btn btn-sm btn-primary" onclick="addItemRow()">
+                                <i class="bi bi-plus-circle"></i> Add Item
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 40%;">Product</th>
+                                            <th style="width: 15%;">Quantity</th>
+                                            <th style="width: 15%;">Rate</th>
+                                            <th style="width: 20%;">Amount</th>
+                                            <th style="width: 10%;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="itemsTable">
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted">Click "Add Item" to start adding products</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <!-- Payment Information -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-cash"></i> Payment Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label">Payment Method</label>
+                                <select class="form-select" th:field="*{paymentMethod}">
+                                    <option value="">Select Method</option>
+                                    <option th:each="method : ${paymentMethods}"
+                                            th:value="${method}"
+                                            th:text="${method.displayName}"></option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Paid Amount</label>
+                                <input type="number" step="0.01" class="form-control" th:field="*{paidAmount}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Information -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-file-text"></i> Additional Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label">Status *</label>
+                                <select class="form-select" th:field="*{status}" required>
+                                    <option th:each="status : ${purchaseStatuses}"
+                                            th:value="${status}"
+                                            th:text="${status.displayName}"></option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Notes</label>
+                                <textarea class="form-control" th:field="*{notes}" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle"></i> Save Purchase
+                                </button>
+                                <a th:href="@{/purchases}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle"></i> Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </th:block>
+
+    <th:block th:fragment="customJs">
+        <script th:inline="javascript">
+            const products = /*[[${products}]]*/ [];
+
+            let itemCounter = 0;
+
+            function addItemRow() {
+                const tbody = document.getElementById('itemsTable');
+                // Remove "no items" message if it exists
+                if (tbody.children.length === 1 && tbody.children[0].children[0].colSpan === 5) {
+                    tbody.innerHTML = '';
+                }
+
+                const row = document.createElement('tr');
+                row.id = `item-${itemCounter}`;
+                row.innerHTML = `
+                    <td>
+                        <select name="productIds" class="form-select form-select-sm" required onchange="updateProductUnit(${itemCounter})">
+                            <option value="">Select Product</option>
+                            ${products.map(p => `<option value="${p.id}" data-unit="${p.unit}">${p.sku} - ${p.name}</option>`).join('')}
+                        </select>
+                    </td>
+                    <td>
+                        <input type="number" name="quantities" step="0.001" class="form-control form-control-sm" required onchange="calculateAmount(${itemCounter})">
+                    </td>
+                    <td>
+                        <input type="number" name="rates" step="0.01" class="form-control form-control-sm" required onchange="calculateAmount(${itemCounter})">
+                    </td>
+                    <td>
+                        <input type="number" step="0.01" class="form-control form-control-sm" id="amount-${itemCounter}" readonly>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-danger" onclick="removeItemRow(${itemCounter})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+                itemCounter++;
+            }
+
+            function removeItemRow(index) {
+                const row = document.getElementById(`item-${index}`);
+                row.remove();
+
+                const tbody = document.getElementById('itemsTable');
+                if (tbody.children.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Click "Add Item" to start adding products</td></tr>';
+                }
+            }
+
+            function calculateAmount(index) {
+                const row = document.getElementById(`item-${index}`);
+                const qty = parseFloat(row.querySelector('input[name="quantities"]').value) || 0;
+                const rate = parseFloat(row.querySelector('input[name="rates"]').value) || 0;
+                const amount = qty * rate;
+                row.querySelector(`#amount-${index}`).value = amount.toFixed(2);
+            }
+        </script>
+    </th:block>
+</body>
+</html>

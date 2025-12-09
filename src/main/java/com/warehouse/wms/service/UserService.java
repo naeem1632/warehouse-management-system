@@ -37,6 +37,10 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
 
+    public User getUserEntityById(Long id) {
+        return getUserById(id);
+    }
+
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));

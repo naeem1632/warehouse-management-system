@@ -145,8 +145,8 @@
                     </div>
                     <div class="card-body">
                         <p class="small text-muted mb-2">
-                            <strong>Account Age:</strong>
-                            <span th:text="${#temporals.daysBetween(user.createdAt, #temporals.createNow())}">0</span> days
+                            <strong>Account Created:</strong>
+                            <span th:text="${#temporals.format(user.createdAt, 'MMMM dd, yyyy')}">Date</span>
                         </p>
                         <p class="small text-muted mb-0">
                             <strong>Password:</strong> Encrypted with BCrypt

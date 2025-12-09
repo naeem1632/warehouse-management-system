@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/main :: main(content=~{::content}, customCss=~{}, customJs=~{::customJs})}">
+<body>
+    <th:block th:fragment="content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h1><i class="bi bi-truck"></i> Supplier Details</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a th:href="@{/suppliers}">Suppliers</a></li>
+                            <li class="breadcrumb-item active">View</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div class="col-auto">
+                    <a th:href="@{/suppliers/{id}/edit(id=${supplier.id})}" class="btn btn-warning me-2">
+                        <i class="bi bi-pencil"></i> Edit
+                    </a>
+                    <a th:href="@{/suppliers/{id}/ledger(id=${supplier.id})}" class="btn btn-primary me-2">
+                        <i class="bi bi-journal-text"></i> Ledger
+                    </a>
+                    <a th:href="@{/suppliers}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Basic Information -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-info-circle"></i> Basic Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-muted mb-1">Supplier Code</h6>
+                                <p th:text="${supplier.code}"></p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-muted mb-1">Supplier Name</h6>
+                                <p th:text="${supplier.name}"></p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-muted mb-1">Business Type</h6>
+                                <p th:text="${supplier.businessType?.displayName}"></p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-muted mb-1">Status</h6>
+                                <p>
+                                    <span th:if="${supplier.status == 'ACTIVE'}" class="badge bg-success">Active</span>
+                                    <span th:if="${supplier.status == 'INACTIVE'}" class="badge bg-secondary">Inactive</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-person"></i> Contact Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-muted mb-1">Contact Person</h6>
+                                <p th:text="${supplier.contactPerson} ?: 'N/A'"></p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-muted mb-1">Designation</h6>
+                                <p th:text="${supplier.designation} ?: 'N/A'"></p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-muted mb-1">Phone</h6>
+                                <p th:text="${supplier.phone} ?: 'N/A'"></p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-muted mb-1">Alternate Phone</h6>
+                                <p th:text="${supplier.alternatePhone} ?: 'N/A'"></p>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <h6 class="text-muted mb-1">Email</h6>
+                                <p th:text="${supplier.email} ?: 'N/A'"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Address Information -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-geo-alt"></i> Address Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <h6 class="text-muted mb-1">Address</h6>
+                                <p th:text="${supplier.address} ?: 'N/A'"></p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-muted mb-1">City</h6>
+                                <p th:text="${supplier.city} ?: 'N/A'"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Financial Summary -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-cash-stack"></i> Financial Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6 class="text-muted mb-1">Current Balance</h6>
+                            <h4 class="mb-0">
+                                <span th:if="${supplier.currentBalanceType?.name() == 'DEBIT'}" class="text-danger">
+                                    Dr. <span th:text="${#numbers.formatDecimal(supplier.currentBalance, 1, 2)}"></span>
+                                </span>
+                                <span th:if="${supplier.currentBalanceType?.name() == 'CREDIT'}" class="text-success">
+                                    Cr. <span th:text="${#numbers.formatDecimal(supplier.currentBalance, 1, 2)}"></span>
+                                </span>
+                            </h4>
+                        </div>
+                        <hr>
+                        <div class="mb-3">
+                            <h6 class="text-muted mb-1">Credit Limit</h6>
+                            <p th:text="${supplier.creditLimit != null} ? ${#numbers.formatDecimal(supplier.creditLimit, 1, 2)} : 'N/A'"></p>
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="text-muted mb-1">Payment Terms</h6>
+                            <p th:text="${supplier.paymentTerms} ?: 'N/A'"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tax Information -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-receipt"></i> Tax Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6 class="text-muted mb-1">NTN</h6>
+                            <p th:text="${supplier.ntn} ?: 'N/A'"></p>
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="text-muted mb-1">STRN</h6>
+                            <p th:text="${supplier.strn} ?: 'N/A'"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </th:block>
+
+    <th:block th:fragment="customJs">
+        <script>
+        </script>
+    </th:block>
+</body>
+</html>
