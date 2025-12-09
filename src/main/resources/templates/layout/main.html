@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:fragment="main(content, customCss, customJs)">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,7 +16,7 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
 
     <!-- Additional page-specific CSS -->
-    <th:block th:insert="~{::customCss}"></th:block>
+    <th:block th:replace="${customCss}"></th:block>
 </head>
 <body>
     <!-- Navigation -->
@@ -105,6 +106,6 @@
     <script th:src="@{/js/main.js}"></script>
 
     <!-- Additional page-specific JS -->
-    <th:block th:insert="~{::customJs}"></th:block>
+    <th:block th:replace="${customJs}"></th:block>
 </body>
 </html>

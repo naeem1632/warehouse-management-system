@@ -1,5 +1,7 @@
 package com.warehouse.wms.entity;
 
+import com.warehouse.wms.enums.UserRole;
+import com.warehouse.wms.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -37,14 +39,4 @@ public class User extends BaseEntity {
     @Column(length = 20)
     private String phone;
 
-    public enum UserRole {
-        ADMIN,
-        WAREHOUSE_MANAGER,
-        STAFF
-    }
-
-    public enum UserStatus {
-        ACTIVE,
-        INACTIVE
-    }
 }

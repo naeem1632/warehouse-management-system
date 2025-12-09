@@ -1,5 +1,6 @@
 package com.warehouse.wms.entity;
 
+import com.warehouse.wms.enums.AuditAction;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -71,9 +72,4 @@ public class AuditLog {
         }
     }
 
-    public enum AuditAction {
-        INSERT,
-        UPDATE,
-        DELETE
-    }
 }

@@ -1,6 +1,7 @@
 package com.warehouse.wms.dto;
 
-import com.warehouse.wms.entity.User;
+import com.warehouse.wms.enums.UserRole;
+import com.warehouse.wms.enums.UserStatus;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -31,10 +32,10 @@ public class UserDTO {
     private String password;
 
     @NotNull(message = "Role is required")
-    private User.UserRole role;
+    private UserRole role;
 
     @NotNull(message = "Status is required")
-    private User.UserStatus status;
+    private UserStatus status;
 
     private String phone;
 }

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="002-create-product-and-stock-tables" author="system">
+        <comment>Create product categories, products, warehouse product prices, stock movements, and stock current tables</comment>
+
+        <sqlFile
+                path="db/changelog/sql/002-create-product-and-stock-tables.sql"
+                relativeToChangelogFile="false"
+                splitStatements="true"
+                stripComments="false"/>
+
+        <rollback>
+            <sql>
+                DROP TABLE IF EXISTS stock_current CASCADE;
+                DROP TABLE IF EXISTS stock_movements CASCADE;
+                DROP TABLE IF EXISTS warehouse_product_prices CASCADE;
+                DROP TABLE IF EXISTS products CASCADE;
+                DROP TABLE IF EXISTS product_categories CASCADE;
+            </sql>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

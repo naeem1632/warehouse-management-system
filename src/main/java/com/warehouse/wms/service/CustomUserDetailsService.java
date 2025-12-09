@@ -1,6 +1,7 @@
 package com.warehouse.wms.service;
 
 import com.warehouse.wms.entity.User;
+import com.warehouse.wms.enums.UserStatus;
 import com.warehouse.wms.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -26,7 +27,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
-        if (user.getStatus() != User.UserStatus.ACTIVE) {
+        if (user.getStatus() != UserStatus.ACTIVE) {
             throw new UsernameNotFoundException("User account is inactive");
         }
 

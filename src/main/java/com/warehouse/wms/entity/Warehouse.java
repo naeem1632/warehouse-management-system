@@ -1,5 +1,6 @@
 package com.warehouse.wms.entity;
 
+import com.warehouse.wms.enums.WarehouseStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -48,8 +49,4 @@ public class Warehouse extends BaseEntity {
     @Column(name = "created_by")
     private Long createdBy;
 
-    public enum WarehouseStatus {
-        ACTIVE,
-        INACTIVE
-    }
 }

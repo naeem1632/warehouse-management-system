@@ -3,6 +3,7 @@ package com.warehouse.wms.service;
 import com.warehouse.wms.dto.UserDTO;
 import com.warehouse.wms.entity.AuditLog;
 import com.warehouse.wms.entity.User;
+import com.warehouse.wms.enums.AuditAction;
 import com.warehouse.wms.repository.AuditLogRepository;
 import com.warehouse.wms.repository.UserRepository;
 import com.warehouse.wms.repository.UserWarehouseAccessRepository;
@@ -59,7 +60,7 @@ public class UserService {
         User savedUser = userRepository.save(user);
 
         // Create audit log
-        createAuditLog(savedUser.getId(), "users", savedUser.getId(), AuditLog.AuditAction.INSERT, null, mapUserToAudit(savedUser));
+        createAuditLog(savedUser.getId(), "users", savedUser.getId(), AuditAction.INSERT, null, mapUserToAudit(savedUser));
 
         return savedUser;
     }
@@ -90,7 +91,7 @@ public class UserService {
         User updatedUser = userRepository.save(user);
 
         // Create audit log
-        createAuditLog(updatedUser.getId(), "users", updatedUser.getId(), AuditLog.AuditAction.UPDATE, oldValues, mapUserToAudit(updatedUser));
+        createAuditLog(updatedUser.getId(), "users", updatedUser.getId(), AuditAction.UPDATE, oldValues, mapUserToAudit(updatedUser));
 
         return updatedUser;
     }
@@ -109,10 +110,10 @@ public class UserService {
         userRepository.delete(user);
 
         // Create audit log
-        createAuditLog(user.getId(), "users", id, AuditLog.AuditAction.DELETE, oldValues, null);
+        createAuditLog(user.getId(), "users", id, AuditAction.DELETE, oldValues, null);
     }
 
-    private void createAuditLog(Long userId, String tableName, Long recordId, AuditLog.AuditAction action, Map<String, Object> oldValue, Map<String, Object> newValue) {
+    private void createAuditLog(Long userId, String tableName, Long recordId, AuditAction action, Map<String, Object> oldValue, Map<String, Object> newValue) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUserEmail = authentication.getName();
         User currentUser = userRepository.findByEmail(currentUserEmail).orElse(null);

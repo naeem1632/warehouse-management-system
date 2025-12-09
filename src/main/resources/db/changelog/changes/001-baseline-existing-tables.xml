@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!--
+        Baseline changeset for existing tables created by previous Flyway migrations.
+        This changeset marks the existing database schema without attempting to recreate it.
+        Using validCheckSum to track that these tables already exist.
+    -->
+
+    <changeSet id="001-baseline-existing-tables" author="system">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="users"/>
+            <tableExists tableName="warehouses"/>
+            <tableExists tableName="audit_logs"/>
+            <tableExists tableName="user_warehouse_access"/>
+        </preConditions>
+
+        <comment>Baseline for existing database schema from Flyway migrations</comment>
+
+        <!-- Mark as executed without actually running any changes -->
+        <sql>SELECT 1</sql>
+    </changeSet>
+
+</databaseChangeLog>

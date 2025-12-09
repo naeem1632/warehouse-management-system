@@ -2,6 +2,7 @@ package com.warehouse.wms.controller;
 
 import com.warehouse.wms.dto.WarehouseDTO;
 import com.warehouse.wms.entity.Warehouse;
+import com.warehouse.wms.enums.WarehouseStatus;
 import com.warehouse.wms.service.WarehouseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +47,7 @@ public class WarehouseController {
     @GetMapping("/new")
     public String showCreateForm(Model model) {
         model.addAttribute("warehouseDTO", new WarehouseDTO());
-        model.addAttribute("statuses", Warehouse.WarehouseStatus.values());
+        model.addAttribute("statuses", WarehouseStatus.values());
         model.addAttribute("pageTitle", "Add New Warehouse");
         model.addAttribute("activePage", "warehouses");
         return "warehouses/form";
@@ -60,7 +61,7 @@ public class WarehouseController {
             RedirectAttributes redirectAttributes) {
 
         if (result.hasErrors()) {
-            model.addAttribute("statuses", Warehouse.WarehouseStatus.values());
+            model.addAttribute("statuses", WarehouseStatus.values());
             model.addAttribute("pageTitle", "Add New Warehouse");
             model.addAttribute("activePage", "warehouses");
             return "warehouses/form";
@@ -72,7 +73,7 @@ public class WarehouseController {
             return "redirect:/warehouses";
         } catch (RuntimeException e) {
             model.addAttribute("errorMessage", e.getMessage());
-            model.addAttribute("statuses", Warehouse.WarehouseStatus.values());
+            model.addAttribute("statuses", WarehouseStatus.values());
             model.addAttribute("pageTitle", "Add New Warehouse");
             model.addAttribute("activePage", "warehouses");
             return "warehouses/form";
@@ -97,7 +98,7 @@ public class WarehouseController {
                 .build();
 
         model.addAttribute("warehouseDTO", warehouseDTO);
-        model.addAttribute("statuses", Warehouse.WarehouseStatus.values());
+        model.addAttribute("statuses", WarehouseStatus.values());
         model.addAttribute("isEdit", true);
         model.addAttribute("pageTitle", "Edit Warehouse");
         model.addAttribute("activePage", "warehouses");
@@ -114,7 +115,7 @@ public class WarehouseController {
             RedirectAttributes redirectAttributes) {
 
         if (result.hasErrors()) {
-            model.addAttribute("statuses", Warehouse.WarehouseStatus.values());
+            model.addAttribute("statuses", WarehouseStatus.values());
             model.addAttribute("isEdit", true);
             model.addAttribute("pageTitle", "Edit Warehouse");
             model.addAttribute("activePage", "warehouses");
@@ -127,7 +128,7 @@ public class WarehouseController {
             return "redirect:/warehouses";
         } catch (RuntimeException e) {
             model.addAttribute("errorMessage", e.getMessage());
-            model.addAttribute("statuses", Warehouse.WarehouseStatus.values());
+            model.addAttribute("statuses", WarehouseStatus.values());
             model.addAttribute("isEdit", true);
             model.addAttribute("pageTitle", "Edit Warehouse");
             model.addAttribute("activePage", "warehouses");

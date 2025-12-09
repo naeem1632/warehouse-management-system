@@ -4,6 +4,8 @@ import com.warehouse.wms.dto.WarehouseDTO;
 import com.warehouse.wms.entity.AuditLog;
 import com.warehouse.wms.entity.User;
 import com.warehouse.wms.entity.Warehouse;
+import com.warehouse.wms.enums.AuditAction;
+import com.warehouse.wms.enums.WarehouseStatus;
 import com.warehouse.wms.repository.AuditLogRepository;
 import com.warehouse.wms.repository.UserRepository;
 import com.warehouse.wms.repository.UserWarehouseAccessRepository;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -30,6 +33,14 @@ public class WarehouseService {
 
     public Page<Warehouse> getAllWarehouses(Pageable pageable) {
         return warehouseRepository.findAll(pageable);
+    }
+
+    public List<Warehouse> getAllWarehouses() {
+        return warehouseRepository.findAll();
+    }
+
+    public List<Warehouse> getActiveWarehouses() {
+        return warehouseRepository.findByStatus(WarehouseStatus.ACTIVE);
     }
 
     public Warehouse getWarehouseById(Long id) {
@@ -70,7 +81,7 @@ public class WarehouseService {
         Warehouse savedWarehouse = warehouseRepository.save(warehouse);
 
         // Create audit log
-        createAuditLog(savedWarehouse.getId(), "warehouses", savedWarehouse.getId(), AuditLog.AuditAction.INSERT, null, mapWarehouseToAudit(savedWarehouse));
+        createAuditLog(savedWarehouse.getId(), "warehouses", savedWarehouse.getId(), AuditAction.INSERT, null, mapWarehouseToAudit(savedWarehouse));
 
         return savedWarehouse;
     }
@@ -101,7 +112,7 @@ public class WarehouseService {
         Warehouse updatedWarehouse = warehouseRepository.save(warehouse);
 
         // Create audit log
-        createAuditLog(updatedWarehouse.getCreatedBy(), "warehouses", updatedWarehouse.getId(), AuditLog.AuditAction.UPDATE, oldValues, mapWarehouseToAudit(updatedWarehouse));
+        createAuditLog(updatedWarehouse.getCreatedBy(), "warehouses", updatedWarehouse.getId(), AuditAction.UPDATE, oldValues, mapWarehouseToAudit(updatedWarehouse));
 
         return updatedWarehouse;
     }
@@ -120,17 +131,17 @@ public class WarehouseService {
         warehouseRepository.delete(warehouse);
 
         // Create audit log
-        createAuditLog(warehouse.getCreatedBy(), "warehouses", id, AuditLog.AuditAction.DELETE, oldValues, null);
+        createAuditLog(warehouse.getCreatedBy(), "warehouses", id, AuditAction.DELETE, oldValues, null);
     }
 
-    private void createAuditLog(Long warehouseCreatedBy, String tableName, Long recordId, AuditLog.AuditAction action, Map<String, Object> oldValue, Map<String, Object> newValue) {
+    private void createAuditLog(Long warehouseCreatedBy, String tableName, Long recordId, AuditAction action, Map<String, Object> oldValue, Map<String, Object> newValue) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUserEmail = authentication.getName();
         User currentUser = userRepository.findByEmail(currentUserEmail).orElse(null);
 
         AuditLog auditLog = new AuditLog();
         auditLog.setUserId(currentUser != null ? currentUser.getId() : warehouseCreatedBy);
-        auditLog.setWarehouseId(action == AuditLog.AuditAction.DELETE ? recordId : null);
+        auditLog.setWarehouseId(action == AuditAction.DELETE ? recordId : null);
         auditLog.setTableName(tableName);
         auditLog.setRecordId(recordId);
         auditLog.setAction(action);

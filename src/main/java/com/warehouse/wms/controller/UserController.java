@@ -2,6 +2,8 @@ package com.warehouse.wms.controller;
 
 import com.warehouse.wms.dto.UserDTO;
 import com.warehouse.wms.entity.User;
+import com.warehouse.wms.enums.UserRole;
+import com.warehouse.wms.enums.UserStatus;
 import com.warehouse.wms.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -46,8 +48,8 @@ public class UserController {
     @GetMapping("/new")
     public String showCreateForm(Model model) {
         model.addAttribute("userDTO", new UserDTO());
-        model.addAttribute("roles", User.UserRole.values());
-        model.addAttribute("statuses", User.UserStatus.values());
+        model.addAttribute("roles", UserRole.values());
+        model.addAttribute("statuses", UserStatus.values());
         model.addAttribute("pageTitle", "Add New User");
         model.addAttribute("activePage", "users");
         return "users/form";
@@ -61,8 +63,8 @@ public class UserController {
             RedirectAttributes redirectAttributes) {
 
         if (result.hasErrors()) {
-            model.addAttribute("roles", User.UserRole.values());
-            model.addAttribute("statuses", User.UserStatus.values());
+            model.addAttribute("roles", UserRole.values());
+            model.addAttribute("statuses", UserStatus.values());
             model.addAttribute("pageTitle", "Add New User");
             model.addAttribute("activePage", "users");
             return "users/form";
@@ -74,8 +76,8 @@ public class UserController {
             return "redirect:/users";
         } catch (RuntimeException e) {
             model.addAttribute("errorMessage", e.getMessage());
-            model.addAttribute("roles", User.UserRole.values());
-            model.addAttribute("statuses", User.UserStatus.values());
+            model.addAttribute("roles", UserRole.values());
+            model.addAttribute("statuses", UserStatus.values());
             model.addAttribute("pageTitle", "Add New User");
             model.addAttribute("activePage", "users");
             return "users/form";
@@ -96,8 +98,8 @@ public class UserController {
                 .build();
 
         model.addAttribute("userDTO", userDTO);
-        model.addAttribute("roles", User.UserRole.values());
-        model.addAttribute("statuses", User.UserStatus.values());
+        model.addAttribute("roles", UserRole.values());
+        model.addAttribute("statuses", UserStatus.values());
         model.addAttribute("isEdit", true);
         model.addAttribute("pageTitle", "Edit User");
         model.addAttribute("activePage", "users");
@@ -114,8 +116,8 @@ public class UserController {
             RedirectAttributes redirectAttributes) {
 
         if (result.hasErrors()) {
-            model.addAttribute("roles", User.UserRole.values());
-            model.addAttribute("statuses", User.UserStatus.values());
+            model.addAttribute("roles", UserRole.values());
+            model.addAttribute("statuses", UserStatus.values());
             model.addAttribute("isEdit", true);
             model.addAttribute("pageTitle", "Edit User");
             model.addAttribute("activePage", "users");
@@ -128,8 +130,8 @@ public class UserController {
             return "redirect:/users";
         } catch (RuntimeException e) {
             model.addAttribute("errorMessage", e.getMessage());
-            model.addAttribute("roles", User.UserRole.values());
-            model.addAttribute("statuses", User.UserStatus.values());
+            model.addAttribute("roles", UserRole.values());
+            model.addAttribute("statuses", UserStatus.values());
             model.addAttribute("isEdit", true);
             model.addAttribute("pageTitle", "Edit User");
             model.addAttribute("activePage", "users");

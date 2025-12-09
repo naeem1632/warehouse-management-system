@@ -1,6 +1,6 @@
 package com.warehouse.wms.dto;
 
-import com.warehouse.wms.entity.Warehouse;
+import com.warehouse.wms.enums.WarehouseStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -47,5 +47,5 @@ public class WarehouseDTO {
     private String address;
 
     @NotNull(message = "Status is required")
-    private Warehouse.WarehouseStatus status;
+    private WarehouseStatus status;
 }
