@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- Add warehouse_id column to products table -->
+    <changeSet id="005-1-add-warehouse-to-products" author="naeem">
+        <addColumn tableName="products">
+            <column name="warehouse_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- Set default warehouse for existing products (use first warehouse) -->
+    <changeSet id="005-2-set-default-warehouse-for-existing-products" author="naeem">
+        <sql>
+            UPDATE products
+            SET warehouse_id = (SELECT id FROM warehouses ORDER BY id LIMIT 1)
+            WHERE warehouse_id IS NULL;
+        </sql>
+    </changeSet>
+
+    <!-- Make warehouse_id NOT NULL -->
+    <changeSet id="005-3-make-warehouse-id-not-null" author="naeem">
+        <addNotNullConstraint tableName="products" columnName="warehouse_id"/>
+    </changeSet>
+
+    <!-- Add foreign key constraint -->
+    <changeSet id="005-4-add-foreign-key-warehouse-to-products" author="naeem">
+        <addForeignKeyConstraint
+            constraintName="fk_products_warehouse"
+            baseTableName="products"
+            baseColumnNames="warehouse_id"
+            referencedTableName="warehouses"
+            referencedColumnNames="id"
+            onDelete="RESTRICT"/>
+    </changeSet>
+
+    <!-- Drop existing unique constraint on SKU -->
+    <changeSet id="005-5-drop-unique-sku-constraint" author="naeem">
+        <dropUniqueConstraint tableName="products" constraintName="products_sku_key"/>
+    </changeSet>
+
+    <!-- Add new unique constraint on warehouse_id + sku -->
+    <changeSet id="005-6-add-unique-warehouse-sku-constraint" author="naeem">
+        <addUniqueConstraint
+            tableName="products"
+            columnNames="warehouse_id, sku"
+            constraintName="products_warehouse_sku_unique"/>
+    </changeSet>
+
+    <!-- Add unique index on warehouse_id + LOWER(name) for case-insensitive name uniqueness -->
+    <changeSet id="005-7-add-unique-warehouse-name-index" author="naeem">
+        <sql>
+            CREATE UNIQUE INDEX products_warehouse_name_unique_idx
+            ON products (warehouse_id, LOWER(name));
+        </sql>
+        <rollback>
+            DROP INDEX IF EXISTS products_warehouse_name_unique_idx;
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

@@ -11,6 +11,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -19,11 +21,14 @@ public class UserDTO {
 
     private Long id;
 
+    @NotBlank(message = "Username is required")
+    @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
+    private String username;
+
     @NotBlank(message = "Name is required")
     @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters")
     private String name;
 
-    @NotBlank(message = "Email is required")
     @Email(message = "Please provide a valid email address")
     @Size(max = 100, message = "Email must not exceed 100 characters")
     private String email;
@@ -38,4 +43,6 @@ public class UserDTO {
     private UserStatus status;
 
     private String phone;
+
+    private List<Long> warehouseIds;
 }

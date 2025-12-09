@@ -48,5 +48,10 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Long> {
            "p.purchaseDate >= :date")
     Long countPurchasesFromDate(@Param("date") LocalDate date);
 
+    @Query("SELECT COUNT(p) FROM Purchase p WHERE " +
+           "p.warehouse.id IN :warehouseIds AND p.purchaseDate >= :date")
+    Long countPurchasesByWarehousesAndDate(@Param("warehouseIds") List<Long> warehouseIds,
+                                           @Param("date") LocalDate date);
+
     boolean existsByPurchaseNumber(String purchaseNumber);
 }

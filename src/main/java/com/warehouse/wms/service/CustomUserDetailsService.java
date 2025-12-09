@@ -23,16 +23,16 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     @Transactional(readOnly = true)
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
         if (user.getStatus() != UserStatus.ACTIVE) {
             throw new UsernameNotFoundException("User account is inactive");
         }
 
         return new org.springframework.security.core.userdetails.User(
-            user.getEmail(),
+            user.getUsername(),
             user.getPassword(),
             getAuthorities(user)
         );

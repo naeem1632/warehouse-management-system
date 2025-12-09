@@ -8,7 +8,15 @@ import lombok.*;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "products")
+@Table(name = "products",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "products_warehouse_sku_unique",
+                         columnNames = {"warehouse_id", "sku"})
+    },
+    indexes = {
+        @Index(name = "idx_products_warehouse", columnList = "warehouse_id")
+    }
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -20,7 +28,11 @@ public class Product extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 50)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "warehouse_id", nullable = false)
+    private Warehouse warehouse;
+
+    @Column(nullable = false, length = 50)
     private String sku;
 
     @Column(nullable = false, length = 200)

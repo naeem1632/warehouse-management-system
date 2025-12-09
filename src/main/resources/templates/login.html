@@ -31,7 +31,7 @@
                         <!-- Error Message -->
                         <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
                             <i class="bi bi-exclamation-triangle-fill"></i>
-                            <span>Invalid email or password. Please try again.</span>
+                            <span>Invalid username or password. Please try again.</span>
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
 
@@ -44,21 +44,21 @@
 
                         <!-- Login Form -->
                         <form th:action="@{/login}" method="post" class="needs-validation" novalidate>
-                            <!-- Email Field -->
+                            <!-- Username Field -->
                             <div class="mb-3">
-                                <label for="email" class="form-label">
-                                    <i class="bi bi-envelope"></i> Email Address
+                                <label for="username" class="form-label">
+                                    <i class="bi bi-person-badge"></i> Username
                                 </label>
-                                <input type="email"
+                                <input type="text"
                                        class="form-control form-control-lg"
-                                       id="email"
+                                       id="username"
                                        name="username"
-                                       placeholder="Enter your email"
+                                       placeholder="Enter your username"
                                        required
                                        autofocus
-                                       autocomplete="email">
+                                       autocomplete="username">
                                 <div class="invalid-feedback">
-                                    Please enter a valid email address.
+                                    Please enter your username.
                                 </div>
                             </div>
 
@@ -113,7 +113,7 @@
                             <p class="text-muted small mb-2">
                                 <i class="bi bi-info-circle"></i> <strong>Default Admin Credentials:</strong>
                             </p>
-                            <p class="text-muted small mb-1">Email: admin@warehouse.com</p>
+                            <p class="text-muted small mb-1">Username: admin</p>
                             <p class="text-muted small mb-0">Password: admin123</p>
                         </div>
                     </div>

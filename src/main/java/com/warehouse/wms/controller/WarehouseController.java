@@ -4,6 +4,7 @@ import com.warehouse.wms.dto.WarehouseDTO;
 import com.warehouse.wms.entity.Warehouse;
 import com.warehouse.wms.enums.WarehouseStatus;
 import com.warehouse.wms.service.WarehouseService;
+import com.warehouse.wms.util.SecurityUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,10 +17,13 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 @Controller
 @RequestMapping("/warehouses")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
 public class WarehouseController {
 
     private final WarehouseService warehouseService;
@@ -30,14 +34,28 @@ public class WarehouseController {
             @RequestParam(defaultValue = "10") int size,
             Model model) {
 
-        Page<Warehouse> warehousePage = warehouseService.getAllWarehouses(
-                PageRequest.of(page, size, Sort.by("createdAt").descending())
-        );
+        List<Warehouse> warehouses;
 
-        model.addAttribute("warehouses", warehousePage.getContent());
+        // Filter by user's assigned warehouses
+        if (SecurityUtils.isAdmin()) {
+            // Admin sees all warehouses
+            Page<Warehouse> warehousePage = warehouseService.getAllWarehouses(
+                    PageRequest.of(page, size, Sort.by("createdAt").descending())
+            );
+            warehouses = warehousePage.getContent();
+            model.addAttribute("totalPages", warehousePage.getTotalPages());
+            model.addAttribute("totalItems", warehousePage.getTotalElements());
+        } else {
+            // Non-admin only sees assigned warehouses
+            Set<Warehouse> userWarehouses = SecurityUtils.getCurrentUserWarehouses();
+            warehouses = new ArrayList<>(userWarehouses);
+            warehouses.sort((w1, w2) -> w2.getCreatedAt().compareTo(w1.getCreatedAt()));
+            model.addAttribute("totalPages", 1);
+            model.addAttribute("totalItems", warehouses.size());
+        }
+
+        model.addAttribute("warehouses", warehouses);
         model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", warehousePage.getTotalPages());
-        model.addAttribute("totalItems", warehousePage.getTotalElements());
         model.addAttribute("pageTitle", "Warehouse Management");
         model.addAttribute("activePage", "warehouses");
 
@@ -45,6 +63,7 @@ public class WarehouseController {
     }
 
     @GetMapping("/new")
+    @PreAuthorize("hasRole('ADMIN')")
     public String showCreateForm(Model model) {
         model.addAttribute("warehouseDTO", new WarehouseDTO());
         model.addAttribute("statuses", WarehouseStatus.values());
@@ -55,6 +74,7 @@ public class WarehouseController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public String createWarehouse(
             @Valid @ModelAttribute WarehouseDTO warehouseDTO,
             BindingResult result,
@@ -85,6 +105,9 @@ public class WarehouseController {
 
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable Long id, Model model) {
+        // Validate warehouse access
+        SecurityUtils.validateWarehouseAccess(id);
+
         Warehouse warehouse = warehouseService.getWarehouseById(id);
 
         WarehouseDTO warehouseDTO = WarehouseDTO.builder()
@@ -117,6 +140,14 @@ public class WarehouseController {
             Model model,
             RedirectAttributes redirectAttributes) {
 
+        // Validate warehouse access
+        try {
+            SecurityUtils.validateWarehouseAccess(id);
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/warehouses";
+        }
+
         if (result.hasErrors()) {
             model.addAttribute("statuses", WarehouseStatus.values());
             model.addAttribute("isEdit", true);
@@ -141,6 +172,9 @@ public class WarehouseController {
 
     @GetMapping("/{id}")
     public String viewWarehouse(@PathVariable Long id, Model model) {
+        // Validate warehouse access
+        SecurityUtils.validateWarehouseAccess(id);
+
         Warehouse warehouse = warehouseService.getWarehouseById(id);
         model.addAttribute("warehouse", warehouse);
         model.addAttribute("pageTitle", "View Warehouse");
@@ -149,6 +183,7 @@ public class WarehouseController {
     }
 
     @PostMapping("/{id}/delete")
+    @PreAuthorize("hasRole('ADMIN')")
     public String deleteWarehouse(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
             warehouseService.deleteWarehouse(id);

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- Add username column to users table -->
+    <changeSet id="004-1-add-username-to-users" author="naeem">
+        <!-- First add column as nullable to allow existing data -->
+        <addColumn tableName="users">
+            <column name="username" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <!-- Generate username from email for existing users -->
+        <sql>
+            UPDATE users SET username = SUBSTRING(email FROM 1 FOR POSITION('@' IN email) - 1) WHERE username IS NULL;
+        </sql>
+
+        <!-- Make username not null and unique -->
+        <addNotNullConstraint tableName="users" columnName="username" columnDataType="VARCHAR(50)"/>
+        <addUniqueConstraint tableName="users" columnNames="username" constraintName="uk_users_username"/>
+    </changeSet>
+
+    <!-- Make email optional -->
+    <changeSet id="004-2-make-email-optional" author="naeem">
+        <dropNotNullConstraint tableName="users" columnName="email" columnDataType="VARCHAR(100)"/>
+    </changeSet>
+
+    <!-- Create user_warehouses join table -->
+    <changeSet id="004-3-create-user-warehouses-table" author="naeem">
+        <createTable tableName="user_warehouses">
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="warehouse_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="user_warehouses" columnNames="user_id, warehouse_id" constraintName="pk_user_warehouses"/>
+
+        <addForeignKeyConstraint
+                baseTableName="user_warehouses"
+                baseColumnNames="user_id"
+                constraintName="fk_user_warehouses_user"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint
+                baseTableName="user_warehouses"
+                baseColumnNames="warehouse_id"
+                constraintName="fk_user_warehouses_warehouse"
+                referencedTableName="warehouses"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>

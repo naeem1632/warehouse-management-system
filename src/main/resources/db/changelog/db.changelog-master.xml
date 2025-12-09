@@ -14,4 +14,10 @@
     <!-- Supplier and Purchase Management -->
     <include file="db/changelog/changes/003-create-supplier-and-purchase-tables.xml"/>
 
+    <!-- User Management Updates: Username and Warehouse Assignment -->
+    <include file="db/changelog/changes/004-update-users-add-username-and-warehouses.xml"/>
+
+    <!-- Product Management Updates: Warehouse-Specific Products -->
+    <include file="db/changelog/changes/005-add-warehouse-to-products.xml"/>
+
 </databaseChangeLog>

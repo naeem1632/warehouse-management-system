@@ -3,6 +3,7 @@ package com.warehouse.wms.controller;
 import com.warehouse.wms.dto.PurchaseDTO;
 import com.warehouse.wms.dto.PurchaseItemDTO;
 import com.warehouse.wms.dto.SupplierDTO;
+import com.warehouse.wms.entity.Warehouse;
 import com.warehouse.wms.enums.PaymentMethod;
 import com.warehouse.wms.enums.PaymentStatus;
 import com.warehouse.wms.enums.PurchaseStatus;
@@ -23,7 +24,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Controller
 @RequestMapping("/purchases")
@@ -43,26 +46,63 @@ public class PurchaseController {
                                @RequestParam(required = false) Long supplierId,
                                Model model) {
         try {
+            // Get accessible warehouses based on user role
+            List<Warehouse> accessibleWarehouses;
+            if (SecurityUtils.isAdmin()) {
+                accessibleWarehouses = warehouseService.getActiveWarehouses();
+            } else {
+                Set<Warehouse> userWarehouses = SecurityUtils.getCurrentUserWarehouses();
+                accessibleWarehouses = new ArrayList<>(userWarehouses);
+            }
+
+            // Validate warehouse access if specific warehouse is requested
+            if (warehouseId != null) {
+                SecurityUtils.validateWarehouseAccess(warehouseId);
+            }
+
             Pageable pageable = PageRequest.of(page, size, Sort.by("purchaseDate").descending());
             Page<PurchaseDTO> purchasesPage;
 
-            if (warehouseId != null) {
-                purchasesPage = purchaseService.getPurchasesByWarehouse(warehouseId, pageable);
-                model.addAttribute("warehouseId", warehouseId);
-            } else if (supplierId != null) {
-                purchasesPage = purchaseService.getPurchasesBySupplier(supplierId, pageable);
-                model.addAttribute("supplierId", supplierId);
+            // For non-admin users, filter by their assigned warehouses
+            if (!SecurityUtils.isAdmin()) {
+                if (accessibleWarehouses.isEmpty()) {
+                    // No accessible warehouses
+                    purchasesPage = Page.empty(pageable);
+                } else if (warehouseId != null) {
+                    // Specific warehouse requested
+                    purchasesPage = purchaseService.getPurchasesByWarehouse(warehouseId, pageable);
+                } else {
+                    // Show purchases from all accessible warehouses
+                    // For now, use first warehouse or we'd need a new service method
+                    // Better approach: add getPurchasesByWarehouses method in service
+                    if (!accessibleWarehouses.isEmpty()) {
+                        warehouseId = accessibleWarehouses.get(0).getId();
+                        purchasesPage = purchaseService.getPurchasesByWarehouse(warehouseId, pageable);
+                    } else {
+                        purchasesPage = Page.empty(pageable);
+                    }
+                }
             } else {
-                purchasesPage = purchaseService.getAllPurchases(pageable);
+                // Admin users: show all or filter as requested
+                if (warehouseId != null) {
+                    purchasesPage = purchaseService.getPurchasesByWarehouse(warehouseId, pageable);
+                    model.addAttribute("warehouseId", warehouseId);
+                } else if (supplierId != null) {
+                    purchasesPage = purchaseService.getPurchasesBySupplier(supplierId, pageable);
+                    model.addAttribute("supplierId", supplierId);
+                } else {
+                    purchasesPage = purchaseService.getAllPurchases(pageable);
+                }
             }
 
             model.addAttribute("purchases", purchasesPage.getContent());
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", purchasesPage.getTotalPages());
             model.addAttribute("totalItems", purchasesPage.getTotalElements());
+            model.addAttribute("selectedWarehouseId", warehouseId);
 
-            // For filters
-            model.addAttribute("warehouses", warehouseService.getActiveWarehouses());
+            // For filters - only show accessible warehouses
+            model.addAttribute("warehouses", accessibleWarehouses);
             model.addAttribute("suppliers", supplierService.getAllActiveSuppliers());
 
             return "purchases/list";
@@ -75,12 +115,21 @@ public class PurchaseController {
 
     @GetMapping("/create")
     public String showCreateForm(Model model) {
+        // Get accessible warehouses based on user role
+        List<Warehouse> accessibleWarehouses;
+        if (SecurityUtils.isAdmin()) {
+            accessibleWarehouses = warehouseService.getActiveWarehouses();
+        } else {
+            Set<Warehouse> userWarehouses = SecurityUtils.getCurrentUserWarehouses();
+            accessibleWarehouses = new ArrayList<>(userWarehouses);
+        }
+
         PurchaseDTO purchase = new PurchaseDTO();
         purchase.setPurchaseDate(LocalDate.now());
 
         model.addAttribute("purchase", purchase);
         model.addAttribute("suppliers", supplierService.getAllActiveSuppliers());
-        model.addAttribute("warehouses", warehouseService.getActiveWarehouses());
+        model.addAttribute("warehouses", accessibleWarehouses);
         model.addAttribute("products", productService.getAllActiveProducts());
         model.addAttribute("paymentMethods", PaymentMethod.values());
         model.addAttribute("paymentStatuses", PaymentStatus.values());
@@ -94,6 +143,9 @@ public class PurchaseController {
         try {
             PurchaseDTO purchase = purchaseService.getPurchaseById(id);
 
+            // Validate warehouse access
+            SecurityUtils.validateWarehouseAccess(purchase.getWarehouseId());
+
             // Check if purchase can be edited
             if (purchase.getStatus() == PurchaseStatus.COMPLETED) {
                 redirectAttributes.addFlashAttribute("error",
@@ -101,9 +153,18 @@ public class PurchaseController {
                 return "redirect:/purchases";
             }
 
+            // Get accessible warehouses
+            List<Warehouse> accessibleWarehouses;
+            if (SecurityUtils.isAdmin()) {
+                accessibleWarehouses = warehouseService.getActiveWarehouses();
+            } else {
+                Set<Warehouse> userWarehouses = SecurityUtils.getCurrentUserWarehouses();
+                accessibleWarehouses = new ArrayList<>(userWarehouses);
+            }
+
             model.addAttribute("purchase", purchase);
             model.addAttribute("suppliers", supplierService.getAllActiveSuppliers());
-            model.addAttribute("warehouses", warehouseService.getActiveWarehouses());
+            model.addAttribute("warehouses", accessibleWarehouses);
             model.addAttribute("products", productService.getAllActiveProducts());
             model.addAttribute("paymentMethods", PaymentMethod.values());
             model.addAttribute("paymentStatuses", PaymentStatus.values());
@@ -121,6 +182,10 @@ public class PurchaseController {
     public String viewPurchase(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
         try {
             PurchaseDTO purchase = purchaseService.getPurchaseById(id);
+
+            // Validate warehouse access
+            SecurityUtils.validateWarehouseAccess(purchase.getWarehouseId());
+
             model.addAttribute("purchase", purchase);
             return "purchases/view";
         } catch (Exception e) {
@@ -137,6 +202,9 @@ public class PurchaseController {
                                 @RequestParam(required = false) List<String> rates,
                                 RedirectAttributes redirectAttributes) {
         try {
+            // Validate warehouse access before creating
+            SecurityUtils.validateWarehouseAccess(purchaseDTO.getWarehouseId());
+
             // Build purchase items from form arrays
             if (productIds != null && !productIds.isEmpty()) {
                 for (int i = 0; i < productIds.size(); i++) {
@@ -170,6 +238,9 @@ public class PurchaseController {
                                 @ModelAttribute PurchaseDTO purchaseDTO,
                                 RedirectAttributes redirectAttributes) {
         try {
+            // Validate warehouse access before updating
+            SecurityUtils.validateWarehouseAccess(purchaseDTO.getWarehouseId());
+
             Long currentUserId = SecurityUtils.getCurrentUserId();
             purchaseService.updatePurchase(id, purchaseDTO, currentUserId);
             redirectAttributes.addFlashAttribute("success", "Purchase updated successfully");
@@ -184,6 +255,10 @@ public class PurchaseController {
     @PostMapping("/{id}/delete")
     public String deletePurchase(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
+            // Get the purchase to check warehouse access
+            PurchaseDTO purchase = purchaseService.getPurchaseById(id);
+            SecurityUtils.validateWarehouseAccess(purchase.getWarehouseId());
+
             Long currentUserId = SecurityUtils.getCurrentUserId();
             purchaseService.deletePurchase(id, currentUserId);
             redirectAttributes.addFlashAttribute("success", "Purchase deleted successfully");

@@ -3,16 +3,20 @@ package com.warehouse.wms.service;
 import com.warehouse.wms.dto.ProductDTO;
 import com.warehouse.wms.entity.Product;
 import com.warehouse.wms.entity.ProductCategory;
+import com.warehouse.wms.entity.Warehouse;
 import com.warehouse.wms.enums.ProductStatus;
 import com.warehouse.wms.enums.ProductUnit;
 import com.warehouse.wms.repository.ProductCategoryRepository;
 import com.warehouse.wms.repository.ProductRepository;
+import com.warehouse.wms.repository.WarehouseRepository;
+import com.warehouse.wms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,17 +27,44 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final ProductCategoryRepository categoryRepository;
+    private final WarehouseRepository warehouseRepository;
 
+    /**
+     * Get all products filtered by user's accessible warehouses
+     */
     public List<ProductDTO> getAllProducts() {
-        return productRepository.findAll().stream()
-            .map(this::convertToDTO)
-            .collect(Collectors.toList());
+        List<Long> warehouseIds = SecurityUtils.getWarehouseIdsForFiltering();
+
+        if (warehouseIds.isEmpty()) {
+            // Admin: return all products
+            return productRepository.findAll().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+        } else {
+            // Non-admin: return products from accessible warehouses
+            return productRepository.findByWarehouseIdIn(warehouseIds).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+        }
     }
 
+    /**
+     * Get active products filtered by user's accessible warehouses
+     */
     public List<ProductDTO> getActiveProducts() {
-        return productRepository.findActiveProductsOrderByName(ProductStatus.ACTIVE).stream()
-            .map(this::convertToDTO)
-            .collect(Collectors.toList());
+        List<Long> warehouseIds = SecurityUtils.getWarehouseIdsForFiltering();
+
+        if (warehouseIds.isEmpty()) {
+            // Admin: return all active products
+            return productRepository.findActiveProductsOrderByName(ProductStatus.ACTIVE).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+        } else {
+            // Non-admin: return active products from accessible warehouses
+            return productRepository.findByWarehouseIdInAndStatus(warehouseIds, ProductStatus.ACTIVE).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+        }
     }
 
     public List<ProductDTO> getAllActiveProducts() {
@@ -52,15 +83,52 @@ public class ProductService {
         return convertToDTO(product);
     }
 
+    /**
+     * Search products filtered by user's accessible warehouses
+     */
     public List<ProductDTO> searchProducts(String search) {
-        return productRepository.searchProducts(search).stream()
-            .map(this::convertToDTO)
-            .collect(Collectors.toList());
+        List<Long> warehouseIds = SecurityUtils.getWarehouseIdsForFiltering();
+
+        if (warehouseIds.isEmpty()) {
+            // Admin: search all products
+            return productRepository.searchProducts(search).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+        } else {
+            // Non-admin: search products from accessible warehouses
+            return productRepository.searchProductsByWarehouses(warehouseIds, search).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+        }
     }
 
+    /**
+     * Create product with warehouse-specific duplicate checking
+     */
     public ProductDTO createProduct(ProductDTO dto) {
-        if (productRepository.existsBySku(dto.getSku())) {
-            throw new RuntimeException("Product with SKU '" + dto.getSku() + "' already exists");
+        // Validate warehouse ID is provided
+        if (dto.getWarehouseId() == null) {
+            throw new RuntimeException("Warehouse ID is required");
+        }
+
+        // Validate warehouse exists
+        Warehouse warehouse = warehouseRepository.findById(dto.getWarehouseId())
+            .orElseThrow(() -> new RuntimeException("Warehouse not found with id: " + dto.getWarehouseId()));
+
+        // Validate user has access to this warehouse
+        SecurityUtils.validateWarehouseAccess(dto.getWarehouseId());
+
+        // Check duplicate SKU in same warehouse
+        if (productRepository.existsByWarehouseIdAndSku(dto.getWarehouseId(), dto.getSku())) {
+            throw new RuntimeException("Product with SKU '" + dto.getSku() +
+                                     "' already exists in warehouse '" + warehouse.getName() + "'");
+        }
+
+        // Check duplicate name (case-insensitive) in same warehouse
+        if (productRepository.existsByWarehouseIdAndNameIgnoreCase(dto.getWarehouseId(), dto.getName())) {
+            throw new RuntimeException("Product with name '" + dto.getName() +
+                                     "' already exists in warehouse '" + warehouse.getName() +
+                                     "'. Please use a different name or check existing products.");
         }
 
         ProductCategory category = null;
@@ -70,6 +138,7 @@ public class ProductService {
         }
 
         Product product = Product.builder()
+            .warehouse(warehouse)
             .sku(dto.getSku())
             .name(dto.getName())
             .category(category)
@@ -86,13 +155,29 @@ public class ProductService {
         return convertToDTO(saved);
     }
 
+    /**
+     * Update product with warehouse-specific duplicate checking
+     */
     public ProductDTO updateProduct(Long id, ProductDTO dto) {
         Product product = productRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
 
+        // Validate user has access to product's warehouse
+        SecurityUtils.validateWarehouseAccess(product.getWarehouse().getId());
+
+        // Check duplicate SKU in same warehouse (excluding current product)
         if (!product.getSku().equals(dto.getSku()) &&
-            productRepository.existsBySkuAndIdNot(dto.getSku(), id)) {
-            throw new RuntimeException("Product with SKU '" + dto.getSku() + "' already exists");
+            productRepository.existsByWarehouseIdAndSkuAndIdNot(product.getWarehouse().getId(), dto.getSku(), id)) {
+            throw new RuntimeException("Product with SKU '" + dto.getSku() +
+                                     "' already exists in this warehouse");
+        }
+
+        // Check duplicate name (case-insensitive) in same warehouse (excluding current product)
+        if (!product.getName().equalsIgnoreCase(dto.getName()) &&
+            productRepository.existsByWarehouseIdAndNameIgnoreCaseAndIdNot(
+                product.getWarehouse().getId(), dto.getName(), id)) {
+            throw new RuntimeException("Product with name '" + dto.getName() +
+                                     "' already exists in this warehouse. Please use a different name.");
         }
 
         ProductCategory category = null;
@@ -114,15 +199,24 @@ public class ProductService {
         return convertToDTO(updated);
     }
 
+    /**
+     * Delete product with warehouse access validation
+     */
     public void deleteProduct(Long id) {
         Product product = productRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+
+        // Validate user has access to product's warehouse
+        SecurityUtils.validateWarehouseAccess(product.getWarehouse().getId());
+
         productRepository.delete(product);
     }
 
     private ProductDTO convertToDTO(Product product) {
         return ProductDTO.builder()
             .id(product.getId())
+            .warehouseId(product.getWarehouse() != null ? product.getWarehouse().getId() : null)
+            .warehouseName(product.getWarehouse() != null ? product.getWarehouse().getName() : null)
             .sku(product.getSku())
             .name(product.getName())
             .categoryId(product.getCategory() != null ? product.getCategory().getId() : null)

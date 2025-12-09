@@ -39,6 +39,22 @@
                               class="needs-validation"
                               novalidate>
 
+                            <!-- Username Field -->
+                            <div class="mb-3">
+                                <label for="username" class="form-label">
+                                    <i class="bi bi-person-badge"></i> Username <span class="text-danger">*</span>
+                                </label>
+                                <input type="text"
+                                       class="form-control"
+                                       th:classappend="${#fields.hasErrors('username')} ? 'is-invalid'"
+                                       id="username"
+                                       th:field="*{username}"
+                                       placeholder="Enter username (used for login)"
+                                       required>
+                                <div class="invalid-feedback" th:errors="*{username}">Username is required</div>
+                                <small class="form-text text-muted">Username will be used for login (3-50 characters)</small>
+                            </div>
+
                             <!-- Name Field -->
                             <div class="mb-3">
                                 <label for="name" class="form-label">
@@ -57,16 +73,15 @@
                             <!-- Email Field -->
                             <div class="mb-3">
                                 <label for="email" class="form-label">
-                                    <i class="bi bi-envelope-fill"></i> Email Address <span class="text-danger">*</span>
+                                    <i class="bi bi-envelope-fill"></i> Email Address
                                 </label>
                                 <input type="email"
                                        class="form-control"
                                        th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'"
                                        id="email"
                                        th:field="*{email}"
-                                       placeholder="Enter email address"
-                                       required>
-                                <div class="invalid-feedback" th:errors="*{email}">Email is required</div>
+                                       placeholder="Enter email address (optional)">
+                                <div class="invalid-feedback" th:errors="*{email}">Invalid email format</div>
                             </div>
 
                             <!-- Password Field -->
@@ -132,7 +147,7 @@
                             </div>
 
                             <!-- Status Field -->
-                            <div class="mb-4">
+                            <div class="mb-3">
                                 <label for="status" class="form-label">
                                     <i class="bi bi-toggle-on"></i> Status <span class="text-danger">*</span>
                                 </label>
@@ -149,6 +164,27 @@
                                     </option>
                                 </select>
                                 <div class="invalid-feedback" th:errors="*{status}">Status is required</div>
+                            </div>
+
+                            <!-- Warehouse Assignment -->
+                            <div class="mb-4">
+                                <label for="warehouseIds" class="form-label">
+                                    <i class="bi bi-building"></i> Assigned Warehouses
+                                </label>
+                                <select class="form-select"
+                                        id="warehouseIds"
+                                        th:field="*{warehouseIds}"
+                                        multiple
+                                        size="5">
+                                    <option th:each="warehouse : ${warehouses}"
+                                            th:value="${warehouse.id}"
+                                            th:text="${warehouse.name + ' (' + warehouse.code + ')'}">
+                                        Warehouse
+                                    </option>
+                                </select>
+                                <small class="form-text text-muted">
+                                    Hold Ctrl (or Cmd on Mac) to select multiple warehouses. Leave empty for admins (access to all warehouses).
+                                </small>
                             </div>
 
                             <!-- Form Actions -->
