@@ -1,8 +1,10 @@
 package com.warehouse.wms.controller;
 
+import com.warehouse.wms.dto.SupplierDTO;
 import com.warehouse.wms.dto.WarehouseDTO;
 import com.warehouse.wms.entity.Warehouse;
 import com.warehouse.wms.enums.WarehouseStatus;
+import com.warehouse.wms.service.SupplierService;
 import com.warehouse.wms.service.WarehouseService;
 import com.warehouse.wms.util.SecurityUtils;
 import jakarta.validation.Valid;
@@ -27,6 +29,7 @@ import java.util.Set;
 public class WarehouseController {
 
     private final WarehouseService warehouseService;
+    private final SupplierService supplierService;
 
     @GetMapping
     public String listWarehouses(
@@ -65,7 +68,9 @@ public class WarehouseController {
     @GetMapping("/new")
     @PreAuthorize("hasRole('ADMIN')")
     public String showCreateForm(Model model) {
+        List<SupplierDTO> suppliers = supplierService.getAllActiveSuppliers();
         model.addAttribute("warehouseDTO", new WarehouseDTO());
+        model.addAttribute("suppliers", suppliers);
         model.addAttribute("statuses", WarehouseStatus.values());
         model.addAttribute("isEdit", false);
         model.addAttribute("pageTitle", "Add New Warehouse");
@@ -82,6 +87,8 @@ public class WarehouseController {
             RedirectAttributes redirectAttributes) {
 
         if (result.hasErrors()) {
+            List<SupplierDTO> suppliers = supplierService.getAllActiveSuppliers();
+            model.addAttribute("suppliers", suppliers);
             model.addAttribute("statuses", WarehouseStatus.values());
             model.addAttribute("isEdit", false);
             model.addAttribute("pageTitle", "Add New Warehouse");
@@ -94,7 +101,9 @@ public class WarehouseController {
             redirectAttributes.addFlashAttribute("successMessage", "Warehouse created successfully");
             return "redirect:/warehouses";
         } catch (RuntimeException e) {
+            List<SupplierDTO> suppliers = supplierService.getAllActiveSuppliers();
             model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("suppliers", suppliers);
             model.addAttribute("statuses", WarehouseStatus.values());
             model.addAttribute("isEdit", false);
             model.addAttribute("pageTitle", "Add New Warehouse");
@@ -114,6 +123,8 @@ public class WarehouseController {
                 .id(warehouse.getId())
                 .code(warehouse.getCode())
                 .name(warehouse.getName())
+                .supplierId(warehouse.getSupplier() != null ? warehouse.getSupplier().getId() : null)
+                .supplierName(warehouse.getSupplier() != null ? warehouse.getSupplier().getName() : null)
                 .location(warehouse.getLocation())
                 .city(warehouse.getCity())
                 .contactPerson(warehouse.getContactPerson())
@@ -123,7 +134,9 @@ public class WarehouseController {
                 .status(warehouse.getStatus())
                 .build();
 
+        List<SupplierDTO> suppliers = supplierService.getAllActiveSuppliers();
         model.addAttribute("warehouseDTO", warehouseDTO);
+        model.addAttribute("suppliers", suppliers);
         model.addAttribute("statuses", WarehouseStatus.values());
         model.addAttribute("isEdit", true);
         model.addAttribute("pageTitle", "Edit Warehouse");
@@ -149,6 +162,8 @@ public class WarehouseController {
         }
 
         if (result.hasErrors()) {
+            List<SupplierDTO> suppliers = supplierService.getAllActiveSuppliers();
+            model.addAttribute("suppliers", suppliers);
             model.addAttribute("statuses", WarehouseStatus.values());
             model.addAttribute("isEdit", true);
             model.addAttribute("pageTitle", "Edit Warehouse");
@@ -161,7 +176,9 @@ public class WarehouseController {
             redirectAttributes.addFlashAttribute("successMessage", "Warehouse updated successfully");
             return "redirect:/warehouses";
         } catch (RuntimeException e) {
+            List<SupplierDTO> suppliers = supplierService.getAllActiveSuppliers();
             model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("suppliers", suppliers);
             model.addAttribute("statuses", WarehouseStatus.values());
             model.addAttribute("isEdit", true);
             model.addAttribute("pageTitle", "Edit Warehouse");

@@ -2,10 +2,12 @@ package com.warehouse.wms.service;
 
 import com.warehouse.wms.dto.ProductDTO;
 import com.warehouse.wms.entity.Product;
+import com.warehouse.wms.entity.Supplier;
 import com.warehouse.wms.entity.Warehouse;
 import com.warehouse.wms.enums.ProductStatus;
 import com.warehouse.wms.enums.ProductUnit;
 import com.warehouse.wms.repository.ProductRepository;
+import com.warehouse.wms.repository.SupplierRepository;
 import com.warehouse.wms.repository.WarehouseRepository;
 import com.warehouse.wms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final WarehouseRepository warehouseRepository;
+    private final SupplierRepository supplierRepository;
 
     /**
      * Get all products filtered by user's accessible warehouses
@@ -115,6 +118,17 @@ public class ProductService {
         // Validate user has access to this warehouse
         SecurityUtils.validateWarehouseAccess(dto.getWarehouseId());
 
+        // Get supplier from warehouse - products inherit warehouse's supplier
+        Supplier supplier = warehouse.getSupplier();
+        if (supplier == null) {
+            throw new RuntimeException("Warehouse '" + warehouse.getName() + "' does not have an assigned supplier");
+        }
+
+        // If supplier ID is provided in DTO, validate it matches warehouse's supplier
+        if (dto.getSupplierId() != null && !dto.getSupplierId().equals(supplier.getId())) {
+            throw new RuntimeException("Product's supplier must match warehouse's supplier (" + supplier.getName() + ")");
+        }
+
         // Check duplicate SKU in same warehouse
         if (productRepository.existsByWarehouseIdAndSku(dto.getWarehouseId(), dto.getSku())) {
             throw new RuntimeException("Product with SKU '" + dto.getSku() +
@@ -130,6 +144,7 @@ public class ProductService {
 
         Product product = Product.builder()
             .warehouse(warehouse)
+            .supplier(supplier)
             .sku(dto.getSku())
             .name(dto.getName())
             .unit(dto.getUnit() != null ? dto.getUnit() : ProductUnit.PCS)
@@ -198,6 +213,8 @@ public class ProductService {
             .id(product.getId())
             .warehouseId(product.getWarehouse() != null ? product.getWarehouse().getId() : null)
             .warehouseName(product.getWarehouse() != null ? product.getWarehouse().getName() : null)
+            .supplierId(product.getSupplier() != null ? product.getSupplier().getId() : null)
+            .supplierName(product.getSupplier() != null ? product.getSupplier().getName() : null)
             .sku(product.getSku())
             .name(product.getName())
             .unit(product.getUnit())

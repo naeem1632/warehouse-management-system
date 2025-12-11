@@ -36,6 +36,7 @@
                                 <th>SKU</th>
                                 <th>Name</th>
                                 <th>Warehouse</th>
+                                <th>Supplier</th>
                                 <th>Unit</th>
                                 <th>Status</th>
                                 <th class="text-end">Actions</th>
@@ -43,7 +44,7 @@
                         </thead>
                         <tbody>
                             <tr th:if="${products.isEmpty()}">
-                                <td colspan="6" class="text-center py-5">
+                                <td colspan="7" class="text-center py-5">
                                     <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
                                     <p class="text-muted mt-3">No products found</p>
                                 </td>
@@ -53,6 +54,10 @@
                                 <td><strong th:text="${product.name}">Product Name</strong></td>
                                 <td>
                                     <span class="badge bg-info" th:text="${product.warehouseName}">Warehouse</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary" th:if="${product.supplierName != null}" th:text="${product.supplierName}">Supplier</span>
+                                    <span class="text-muted" th:if="${product.supplierName == null}">-</span>
                                 </td>
                                 <td th:text="${product.unit}">Unit</td>
                                 <td>

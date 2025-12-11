@@ -27,6 +27,11 @@ public class WarehouseDTO {
     @Size(min = 2, max = 200, message = "Name must be between 2 and 200 characters")
     private String name;
 
+    @NotNull(message = "Supplier is required")
+    private Long supplierId;
+
+    private String supplierName;
+
     @NotBlank(message = "Location is required")
     @Size(max = 200, message = "Location must not exceed 200 characters")
     private String location;

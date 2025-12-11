@@ -17,6 +17,8 @@ public class ProductDTO {
     private Long id;
     private Long warehouseId;
     private String warehouseName;
+    private Long supplierId;
+    private String supplierName;
     private String sku;
     private String name;
     private ProductUnit unit;

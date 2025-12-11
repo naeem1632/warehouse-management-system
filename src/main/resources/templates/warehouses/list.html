@@ -49,6 +49,7 @@
                                 <th>ID</th>
                                 <th>Code</th>
                                 <th>Name</th>
+                                <th>Supplier</th>
                                 <th>Location</th>
                                 <th>City</th>
                                 <th>Contact Person</th>
@@ -59,7 +60,7 @@
                         </thead>
                         <tbody>
                             <tr th:if="${warehouses.isEmpty()}">
-                                <td colspan="9" class="text-center py-5">
+                                <td colspan="10" class="text-center py-5">
                                     <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
                                     <p class="text-muted mt-3">No warehouses found</p>
                                 </td>
@@ -74,6 +75,10 @@
                                         <i class="bi bi-building text-primary me-2" style="font-size: 1.5rem;"></i>
                                         <strong th:text="${warehouse.name}">Name</strong>
                                     </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info" th:if="${warehouse.supplier != null}" th:text="${warehouse.supplier.name}">Supplier</span>
+                                    <span class="text-muted" th:if="${warehouse.supplier == null}">-</span>
                                 </td>
                                 <td th:text="${warehouse.location}">Location</td>
                                 <td th:text="${warehouse.city ?: '-'}">City</td>

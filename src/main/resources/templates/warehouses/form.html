@@ -72,6 +72,26 @@
                                     <div class="invalid-feedback" th:errors="*{name}">Name is required</div>
                                 </div>
 
+                                <!-- Supplier Field -->
+                                <div class="col-md-12 mb-3">
+                                    <label for="supplierId" class="form-label">
+                                        <i class="bi bi-truck"></i> Supplier <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select"
+                                            th:classappend="${#fields.hasErrors('supplierId')} ? 'is-invalid'"
+                                            id="supplierId"
+                                            th:field="*{supplierId}"
+                                            required>
+                                        <option value="">Select supplier</option>
+                                        <option th:each="supplier : ${suppliers}"
+                                                th:value="${supplier.id}"
+                                                th:text="${supplier.name + ' (' + supplier.code + ')'}">
+                                        </option>
+                                    </select>
+                                    <div class="invalid-feedback" th:errors="*{supplierId}">Supplier is required</div>
+                                    <small class="form-text text-muted">This warehouse can only purchase from the selected supplier</small>
+                                </div>
+
                                 <!-- Location Field -->
                                 <div class="col-md-6 mb-3">
                                     <label for="location" class="form-label">

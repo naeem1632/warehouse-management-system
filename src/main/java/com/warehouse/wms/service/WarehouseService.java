@@ -2,11 +2,13 @@ package com.warehouse.wms.service;
 
 import com.warehouse.wms.dto.WarehouseDTO;
 import com.warehouse.wms.entity.AuditLog;
+import com.warehouse.wms.entity.Supplier;
 import com.warehouse.wms.entity.User;
 import com.warehouse.wms.entity.Warehouse;
 import com.warehouse.wms.enums.AuditAction;
 import com.warehouse.wms.enums.WarehouseStatus;
 import com.warehouse.wms.repository.AuditLogRepository;
+import com.warehouse.wms.repository.SupplierRepository;
 import com.warehouse.wms.repository.UserRepository;
 import com.warehouse.wms.repository.UserWarehouseAccessRepository;
 import com.warehouse.wms.repository.WarehouseRepository;
@@ -30,6 +32,7 @@ public class WarehouseService {
     private final UserWarehouseAccessRepository userWarehouseAccessRepository;
     private final AuditLogRepository auditLogRepository;
     private final UserRepository userRepository;
+    private final SupplierRepository supplierRepository;
 
     public Page<Warehouse> getAllWarehouses(Pageable pageable) {
         return warehouseRepository.findAll(pageable);
@@ -60,6 +63,14 @@ public class WarehouseService {
             throw new RuntimeException("Warehouse code already exists: " + warehouseDTO.getCode());
         }
 
+        // Validate supplier
+        if (warehouseDTO.getSupplierId() == null) {
+            throw new RuntimeException("Supplier is required for warehouse");
+        }
+
+        Supplier supplier = supplierRepository.findById(warehouseDTO.getSupplierId())
+                .orElseThrow(() -> new RuntimeException("Supplier not found with id: " + warehouseDTO.getSupplierId()));
+
         // Get current user
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = authentication.getName();
@@ -69,6 +80,7 @@ public class WarehouseService {
         Warehouse warehouse = new Warehouse();
         warehouse.setCode(warehouseDTO.getCode().toUpperCase());
         warehouse.setName(warehouseDTO.getName());
+        warehouse.setSupplier(supplier);
         warehouse.setLocation(warehouseDTO.getLocation());
         warehouse.setCity(warehouseDTO.getCity());
         warehouse.setContactPerson(warehouseDTO.getContactPerson());
@@ -97,6 +109,17 @@ public class WarehouseService {
         if (!warehouse.getCode().equals(warehouseDTO.getCode().toUpperCase()) &&
                 warehouseRepository.existsByCode(warehouseDTO.getCode())) {
             throw new RuntimeException("Warehouse code already exists: " + warehouseDTO.getCode());
+        }
+
+        // Validate and update supplier if changed
+        if (warehouseDTO.getSupplierId() == null) {
+            throw new RuntimeException("Supplier is required for warehouse");
+        }
+
+        if (!warehouse.getSupplier().getId().equals(warehouseDTO.getSupplierId())) {
+            Supplier newSupplier = supplierRepository.findById(warehouseDTO.getSupplierId())
+                    .orElseThrow(() -> new RuntimeException("Supplier not found with id: " + warehouseDTO.getSupplierId()));
+            warehouse.setSupplier(newSupplier);
         }
 
         warehouse.setCode(warehouseDTO.getCode().toUpperCase());

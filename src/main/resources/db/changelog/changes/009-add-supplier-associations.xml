@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- Add supplier association to warehouses and products -->
+
+    <!-- Step 1: Add supplier_id column to warehouses table -->
+    <changeSet id="009-1-add-supplier-to-warehouses" author="naeem">
+        <addColumn tableName="warehouses">
+            <column name="supplier_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- Step 2: Add foreign key constraint for warehouses.supplier_id -->
+    <changeSet id="009-2-add-warehouse-supplier-fk" author="naeem">
+        <addForeignKeyConstraint
+                baseTableName="warehouses"
+                baseColumnNames="supplier_id"
+                constraintName="fk_warehouse_supplier"
+                referencedTableName="suppliers"
+                referencedColumnNames="id"
+                onDelete="RESTRICT"/>
+    </changeSet>
+
+    <!-- Step 3: Add supplier_id column to products table -->
+    <changeSet id="009-3-add-supplier-to-products" author="naeem">
+        <addColumn tableName="products">
+            <column name="supplier_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- Step 4: Add foreign key constraint for products.supplier_id -->
+    <changeSet id="009-4-add-product-supplier-fk" author="naeem">
+        <addForeignKeyConstraint
+                baseTableName="products"
+                baseColumnNames="supplier_id"
+                constraintName="fk_product_supplier"
+                referencedTableName="suppliers"
+                referencedColumnNames="id"
+                onDelete="RESTRICT"/>
+    </changeSet>
+
+    <!-- Step 5: Make supplier_id NOT NULL in warehouses (after data is populated) -->
+    <!-- NOTE: This step should be executed manually after assigning suppliers to all existing warehouses -->
+    <!-- <changeSet id="009-5-make-warehouse-supplier-not-null" author="naeem">
+        <addNotNullConstraint
+                tableName="warehouses"
+                columnName="supplier_id"
+                columnDataType="BIGINT"/>
+    </changeSet> -->
+
+    <!-- Step 6: Make supplier_id NOT NULL in products (after data is populated) -->
+    <!-- NOTE: This step should be executed manually after assigning suppliers to all existing products -->
+    <!-- <changeSet id="009-6-make-product-supplier-not-null" author="naeem">
+        <addNotNullConstraint
+                tableName="products"
+                columnName="supplier_id"
+                columnDataType="BIGINT"/>
+    </changeSet> -->
+
+</databaseChangeLog>

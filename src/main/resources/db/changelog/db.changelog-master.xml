@@ -29,4 +29,7 @@
     <!-- Products: Remove product_categories table and minimum_stock column -->
     <include file="db/changelog/changes/008-remove-product-categories-and-minimum-stock.xml"/>
 
+    <!-- Add supplier associations to warehouses and products -->
+    <include file="db/changelog/changes/009-add-supplier-associations.xml"/>
+
 </databaseChangeLog>
