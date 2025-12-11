@@ -209,12 +209,18 @@ public class ProductService {
     }
 
     private ProductDTO convertToDTO(Product product) {
+        // Get supplier from product, or inherit from warehouse if product's supplier is null
+        Supplier supplier = product.getSupplier();
+        if (supplier == null && product.getWarehouse() != null) {
+            supplier = product.getWarehouse().getSupplier();
+        }
+
         return ProductDTO.builder()
             .id(product.getId())
             .warehouseId(product.getWarehouse() != null ? product.getWarehouse().getId() : null)
             .warehouseName(product.getWarehouse() != null ? product.getWarehouse().getName() : null)
-            .supplierId(product.getSupplier() != null ? product.getSupplier().getId() : null)
-            .supplierName(product.getSupplier() != null ? product.getSupplier().getName() : null)
+            .supplierId(supplier != null ? supplier.getId() : null)
+            .supplierName(supplier != null ? supplier.getName() : null)
             .sku(product.getSku())
             .name(product.getName())
             .unit(product.getUnit())

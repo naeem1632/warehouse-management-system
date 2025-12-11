@@ -36,32 +36,18 @@
                         </a>
                     </li>
                     <li class="nav-item" sec:authorize="hasRole('ADMIN')">
-                        <a class="nav-link" th:href="@{/users}" th:classappend="${#strings.equals(activePage, 'users')} ? 'active' : ''">
-                            <i class="bi bi-people"></i> Users
-                        </a>
-                    </li>
-                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                         <a class="nav-link" th:href="@{/warehouses}" th:classappend="${#strings.equals(activePage, 'warehouses')} ? 'active' : ''">
                             <i class="bi bi-building"></i> Warehouses
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" th:href="@{/products}" th:classappend="${#strings.equals(activePage, 'products')} ? 'active' : ''">
-                            <i class="bi bi-box-seam"></i> Products
-                        </a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" th:classappend="${#strings.equals(activePage, 'stock')} ? 'active' : ''">
-                            <i class="bi bi-boxes"></i> Stock
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" th:href="@{/stock/overview}">Stock Overview</a></li>
-                            <li><a class="dropdown-item" th:href="@{/stock/opening-balance/new}">Opening Balance</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link" th:href="@{/suppliers}" th:classappend="${#strings.equals(activePage, 'suppliers')} ? 'active' : ''">
                             <i class="bi bi-truck"></i> Suppliers
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/products}" th:classappend="${#strings.equals(activePage, 'products')} ? 'active' : ''">
+                            <i class="bi bi-box-seam"></i> Products
                         </a>
                     </li>
                     <li class="nav-item dropdown">
@@ -72,6 +58,20 @@
                             <li><a class="dropdown-item" th:href="@{/purchases}">All Purchases</a></li>
                             <li><a class="dropdown-item" th:href="@{/purchases/create}">New Purchase</a></li>
                         </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" th:classappend="${#strings.equals(activePage, 'stock')} ? 'active' : ''">
+                            <i class="bi bi-boxes"></i> Stock
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" th:href="@{/stock/overview}">Stock Overview</a></li>
+                            <li><a class="dropdown-item" th:href="@{/stock/opening-balance/new}">Opening Balance</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                        <a class="nav-link" th:href="@{/users}" th:classappend="${#strings.equals(activePage, 'users')} ? 'active' : ''">
+                            <i class="bi bi-people"></i> Users
+                        </a>
                     </li>
                 </ul>
                 <ul class="navbar-nav">

@@ -116,7 +116,8 @@ public class WarehouseService {
             throw new RuntimeException("Supplier is required for warehouse");
         }
 
-        if (!warehouse.getSupplier().getId().equals(warehouseDTO.getSupplierId())) {
+        // Check if supplier needs to be updated (handles null case for existing warehouses)
+        if (warehouse.getSupplier() == null || !warehouse.getSupplier().getId().equals(warehouseDTO.getSupplierId())) {
             Supplier newSupplier = supplierRepository.findById(warehouseDTO.getSupplierId())
                     .orElseThrow(() -> new RuntimeException("Supplier not found with id: " + warehouseDTO.getSupplierId()));
             warehouse.setSupplier(newSupplier);

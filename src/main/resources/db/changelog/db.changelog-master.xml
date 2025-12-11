@@ -32,4 +32,7 @@
     <!-- Add supplier associations to warehouses and products -->
     <include file="db/changelog/changes/009-add-supplier-associations.xml"/>
 
+    <!-- Update existing products to inherit supplier from warehouse -->
+    <include file="db/changelog/changes/010-update-products-inherit-supplier-from-warehouse.xml"/>
+
 </databaseChangeLog>

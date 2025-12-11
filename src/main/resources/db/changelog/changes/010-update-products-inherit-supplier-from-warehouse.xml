@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- Update existing products to inherit supplier from their warehouse -->
+    <changeSet id="010-1-update-products-supplier-from-warehouse" author="naeem">
+        <comment>Set supplier_id for existing products based on their warehouse's supplier</comment>
+        <sql>
+            UPDATE products p
+            SET supplier_id = (
+                SELECT w.supplier_id
+                FROM warehouses w
+                WHERE w.id = p.warehouse_id
+            )
+            WHERE p.supplier_id IS NULL
+              AND p.warehouse_id IS NOT NULL
+              AND EXISTS (
+                  SELECT 1
+                  FROM warehouses w
+                  WHERE w.id = p.warehouse_id
+                    AND w.supplier_id IS NOT NULL
+              );
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
