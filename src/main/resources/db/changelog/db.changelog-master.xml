@@ -35,4 +35,7 @@
     <!-- Update existing products to inherit supplier from warehouse -->
     <include file="db/changelog/changes/010-update-products-inherit-supplier-from-warehouse.xml"/>
 
+    <!-- Purchase enhancements: payments, attachments, quantity-based, audit trail -->
+    <include file="db/changelog/changes/011-add-purchase-enhancements.xml"/>
+
 </databaseChangeLog>

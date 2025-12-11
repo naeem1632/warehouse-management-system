@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- Add quantity field to purchase_items -->
+    <changeSet id="011-1-add-quantity-to-purchase-items" author="naeem">
+        <addColumn tableName="purchase_items">
+            <column name="quantity" type="DECIMAL(10,2)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="purchase_items">
+            <column name="unit" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- Make weight fields nullable (they are now optional, for info only) -->
+    <changeSet id="011-2-make-weights-nullable" author="naeem">
+        <dropNotNullConstraint tableName="purchase_items" columnName="gross_weight" columnDataType="DECIMAL(10,2)"/>
+        <dropNotNullConstraint tableName="purchase_items" columnName="tare_weight" columnDataType="DECIMAL(10,2)"/>
+        <dropNotNullConstraint tableName="purchase_items" columnName="net_weight" columnDataType="DECIMAL(10,2)"/>
+    </changeSet>
+
+    <!-- Migrate existing data: set quantity = net_weight for existing records -->
+    <changeSet id="011-3-migrate-existing-quantities" author="naeem">
+        <sql>
+            UPDATE purchase_items
+            SET quantity = COALESCE(net_weight, gross_weight, 1),
+                unit = 'KG'
+            WHERE quantity IS NULL OR unit IS NULL;
+        </sql>
+    </changeSet>
+
+    <!-- Create purchase_payments table -->
+    <changeSet id="011-4-create-purchase-payments" author="naeem">
+        <createTable tableName="purchase_payments">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="purchase_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_date" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="DECIMAL(15,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_method" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reference_number" type="VARCHAR(100)"/>
+            <column name="notes" type="TEXT"/>
+            <column name="created_by" type="BIGINT"/>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="purchase_payments"
+                baseColumnNames="purchase_id"
+                constraintName="fk_payment_purchase"
+                referencedTableName="purchases"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+    <!-- Create purchase_attachments table -->
+    <changeSet id="011-5-create-purchase-attachments" author="naeem">
+        <createTable tableName="purchase_attachments">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="purchase_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="original_file_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_path" type="VARCHAR(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_type" type="VARCHAR(100)"/>
+            <column name="file_size" type="BIGINT"/>
+            <column name="attachment_type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="uploaded_by" type="BIGINT"/>
+            <column name="uploaded_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="purchase_attachments"
+                baseColumnNames="purchase_id"
+                constraintName="fk_attachment_purchase"
+                referencedTableName="purchases"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+    <!-- Create purchase_audit_logs table -->
+    <changeSet id="011-6-create-purchase-audit-logs" author="naeem">
+        <createTable tableName="purchase_audit_logs">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="purchase_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="action" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="field_name" type="VARCHAR(100)"/>
+            <column name="old_value" type="TEXT"/>
+            <column name="new_value" type="TEXT"/>
+            <column name="changed_by" type="BIGINT"/>
+            <column name="changed_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="notes" type="TEXT"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="purchase_audit_logs"
+                baseColumnNames="purchase_id"
+                constraintName="fk_audit_purchase"
+                referencedTableName="purchases"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+        <createIndex tableName="purchase_audit_logs" indexName="idx_audit_purchase_id">
+            <column name="purchase_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

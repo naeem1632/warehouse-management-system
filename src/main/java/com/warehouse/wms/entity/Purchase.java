@@ -99,6 +99,18 @@ public class Purchase {
     @Builder.Default
     private List<PurchaseItem> items = new ArrayList<>();
 
+    @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<PurchasePayment> payments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<PurchaseAttachment> attachments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<PurchaseAuditLog> auditLogs = new ArrayList<>();
+
     public void addItem(PurchaseItem item) {
         items.add(item);
         item.setPurchase(this);
@@ -107,5 +119,30 @@ public class Purchase {
     public void removeItem(PurchaseItem item) {
         items.remove(item);
         item.setPurchase(null);
+    }
+
+    public void addPayment(PurchasePayment payment) {
+        payments.add(payment);
+        payment.setPurchase(this);
+    }
+
+    public void removePayment(PurchasePayment payment) {
+        payments.remove(payment);
+        payment.setPurchase(null);
+    }
+
+    public void addAttachment(PurchaseAttachment attachment) {
+        attachments.add(attachment);
+        attachment.setPurchase(this);
+    }
+
+    public void removeAttachment(PurchaseAttachment attachment) {
+        attachments.remove(attachment);
+        attachment.setPurchase(null);
+    }
+
+    public void addAuditLog(PurchaseAuditLog log) {
+        auditLogs.add(log);
+        log.setPurchase(this);
     }
 }

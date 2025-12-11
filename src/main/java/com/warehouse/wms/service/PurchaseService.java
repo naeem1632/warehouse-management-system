@@ -39,6 +39,7 @@ public class PurchaseService {
     private final UserService userService;
     private final StockService stockService;
     private final SupplierService supplierService;
+    private final PurchaseAuditService purchaseAuditService;
 
     @Transactional(readOnly = true)
     public Page<PurchaseDTO> getAllPurchases(Pageable pageable) {
@@ -133,6 +134,7 @@ public class PurchaseService {
                     .purchase(purchase)
                     .product(product)
                     .quantity(itemDto.getQuantity())
+                    .unit(product.getUnit()) // Inherit unit from product
                     .rate(itemDto.getRate())
                     .amount(itemDto.getAmount())
                     .grossWeight(itemDto.getGrossWeight())
@@ -175,6 +177,9 @@ public class PurchaseService {
         createAuditLog(currentUserId, "purchases", purchase.getId(), AuditAction.INSERT,
                 null, mapPurchaseToAudit(purchase));
 
+        // Purchase-specific audit trail
+        purchaseAuditService.logPurchaseCreation(purchase.getId());
+
         log.info("Purchase created: {} for warehouse: {} by user: {}",
                 purchase.getPurchaseNumber(), warehouse.getName(), currentUserId);
 
@@ -186,23 +191,59 @@ public class PurchaseService {
         Purchase purchase = purchaseRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Purchase not found with id: " + id));
 
-        // Cannot update completed purchases with stock movements
-        if (purchase.getStatus() == PurchaseStatus.COMPLETED) {
-            throw new RuntimeException("Cannot update completed purchase. Please create a new purchase or adjustment.");
-        }
-
         Purchase oldPurchase = clonePurchase(purchase);
+        PurchaseStatus oldStatus = purchase.getStatus();
 
-        // Update basic fields
-        purchase.setPurchaseDate(dto.getPurchaseDate());
-        purchase.setSupplierInvoiceNumber(dto.getSupplierInvoiceNumber());
-        purchase.setVehicleNumber(dto.getVehicleNumber());
-        purchase.setDriverName(dto.getDriverName());
-        purchase.setDriverPhone(dto.getDriverPhone());
-        purchase.setGrossWeight(dto.getGrossWeight());
-        purchase.setTareWeight(dto.getTareWeight());
-        purchase.setNetWeight(dto.getNetWeight());
-        purchase.setNotes(dto.getNotes());
+        // Track what changed for audit
+        StringBuilder changeNotes = new StringBuilder("Updated fields: ");
+        boolean hasChanges = false;
+
+        // Update basic fields and track changes
+        if (!purchase.getPurchaseDate().equals(dto.getPurchaseDate())) {
+            purchase.setPurchaseDate(dto.getPurchaseDate());
+            changeNotes.append("Purchase Date, ");
+            hasChanges = true;
+        }
+        if (!equalsNullSafe(purchase.getSupplierInvoiceNumber(), dto.getSupplierInvoiceNumber())) {
+            purchase.setSupplierInvoiceNumber(dto.getSupplierInvoiceNumber());
+            changeNotes.append("Invoice Number, ");
+            hasChanges = true;
+        }
+        if (!equalsNullSafe(purchase.getVehicleNumber(), dto.getVehicleNumber())) {
+            purchase.setVehicleNumber(dto.getVehicleNumber());
+            changeNotes.append("Vehicle Number, ");
+            hasChanges = true;
+        }
+        if (!equalsNullSafe(purchase.getDriverName(), dto.getDriverName())) {
+            purchase.setDriverName(dto.getDriverName());
+            changeNotes.append("Driver Name, ");
+            hasChanges = true;
+        }
+        if (!equalsNullSafe(purchase.getDriverPhone(), dto.getDriverPhone())) {
+            purchase.setDriverPhone(dto.getDriverPhone());
+            changeNotes.append("Driver Phone, ");
+            hasChanges = true;
+        }
+        if (!equalsNullSafe(purchase.getGrossWeight(), dto.getGrossWeight())) {
+            purchase.setGrossWeight(dto.getGrossWeight());
+            changeNotes.append("Gross Weight, ");
+            hasChanges = true;
+        }
+        if (!equalsNullSafe(purchase.getTareWeight(), dto.getTareWeight())) {
+            purchase.setTareWeight(dto.getTareWeight());
+            changeNotes.append("Tare Weight, ");
+            hasChanges = true;
+        }
+        if (!equalsNullSafe(purchase.getNetWeight(), dto.getNetWeight())) {
+            purchase.setNetWeight(dto.getNetWeight());
+            changeNotes.append("Net Weight, ");
+            hasChanges = true;
+        }
+        if (!equalsNullSafe(purchase.getNotes(), dto.getNotes())) {
+            purchase.setNotes(dto.getNotes());
+            changeNotes.append("Notes, ");
+            hasChanges = true;
+        }
 
         purchase = purchaseRepository.save(purchase);
 
@@ -210,8 +251,27 @@ public class PurchaseService {
         createAuditLog(currentUserId, "purchases", purchase.getId(), AuditAction.UPDATE,
                 mapPurchaseToAudit(oldPurchase), mapPurchaseToAudit(purchase));
 
+        // Purchase-specific audit trail
+        if (hasChanges) {
+            String notes = changeNotes.substring(0, changeNotes.length() - 2); // Remove trailing comma
+            purchaseAuditService.logPurchaseUpdate(purchase.getId(), notes);
+        }
+
+        // Log status change if applicable
+        if (oldStatus != purchase.getStatus()) {
+            purchaseAuditService.logStatusChange(purchase.getId(),
+                oldStatus != null ? oldStatus.name() : null,
+                purchase.getStatus() != null ? purchase.getStatus().name() : null);
+        }
+
         log.info("Purchase updated: {} by user: {}", purchase.getPurchaseNumber(), currentUserId);
         return convertToDTO(purchase);
+    }
+
+    private boolean equalsNullSafe(Object obj1, Object obj2) {
+        if (obj1 == null && obj2 == null) return true;
+        if (obj1 == null || obj2 == null) return false;
+        return obj1.equals(obj2);
     }
 
     @Transactional
@@ -301,13 +361,18 @@ public class PurchaseService {
     }
 
     private PurchaseItemDTO convertItemToDTO(PurchaseItem item) {
+        // Use unit from item if available, otherwise fallback to product's unit
+        String unitDisplay = item.getUnit() != null
+                ? item.getUnit().getDisplayName()
+                : item.getProduct().getUnit().getDisplayName();
+
         return PurchaseItemDTO.builder()
                 .id(item.getId())
                 .purchaseId(item.getPurchase().getId())
                 .productId(item.getProduct().getId())
                 .productName(item.getProduct().getName())
                 .productSku(item.getProduct().getSku())
-                .productUnit(item.getProduct().getUnit().getDisplayName())
+                .productUnit(unitDisplay)
                 .quantity(item.getQuantity())
                 .rate(item.getRate())
                 .amount(item.getAmount())

@@ -1,5 +1,6 @@
 package com.warehouse.wms.entity;
 
+import com.warehouse.wms.enums.ProductUnit;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -31,12 +32,17 @@ public class PurchaseItem {
     @Column(nullable = false, precision = 15, scale = 3)
     private BigDecimal quantity;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private ProductUnit unit;
+
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal rate;
 
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal amount;
 
+    // Optional weight fields for reference/logistics (especially useful for weight-based units)
     @Column(name = "gross_weight", precision = 15, scale = 3)
     private BigDecimal grossWeight;
 
