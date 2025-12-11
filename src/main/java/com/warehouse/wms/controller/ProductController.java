@@ -4,7 +4,6 @@ import com.warehouse.wms.dto.ProductDTO;
 import com.warehouse.wms.entity.Warehouse;
 import com.warehouse.wms.enums.ProductStatus;
 import com.warehouse.wms.enums.ProductUnit;
-import com.warehouse.wms.service.ProductCategoryService;
 import com.warehouse.wms.service.ProductService;
 import com.warehouse.wms.service.WarehouseService;
 import com.warehouse.wms.util.SecurityUtils;
@@ -24,7 +23,6 @@ import java.util.Set;
 public class ProductController {
 
     private final ProductService productService;
-    private final ProductCategoryService categoryService;
     private final WarehouseService warehouseService;
 
     @GetMapping
@@ -58,7 +56,6 @@ public class ProductController {
         model.addAttribute("product", productDTO);
         model.addAttribute("warehouses", accessibleWarehouses);
         model.addAttribute("isEdit", false);
-        model.addAttribute("categories", categoryService.getActiveCategories());
         model.addAttribute("units", ProductUnit.values());
         model.addAttribute("statuses", ProductStatus.values());
         return "products/form";
@@ -84,7 +81,6 @@ public class ProductController {
             model.addAttribute("product", product);
             model.addAttribute("warehouses", accessibleWarehouses);
             model.addAttribute("isEdit", true);
-            model.addAttribute("categories", categoryService.getActiveCategories());
             model.addAttribute("units", ProductUnit.values());
             model.addAttribute("statuses", ProductStatus.values());
             return "products/form";

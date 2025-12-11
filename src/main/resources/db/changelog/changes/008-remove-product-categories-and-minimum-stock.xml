@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- Remove product_categories table and minimum_stock column from products -->
+
+    <!-- Step 1: Drop minimum_stock column from products if it exists -->
+    <changeSet id="008-1-drop-minimum-stock-column" author="naeem">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="products" columnName="minimum_stock"/>
+        </preConditions>
+        <dropColumn tableName="products" columnName="minimum_stock"/>
+    </changeSet>
+
+    <!-- Step 2: Drop product_categories table if it exists -->
+    <changeSet id="008-2-drop-product-categories-table" author="naeem">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="product_categories"/>
+        </preConditions>
+        <dropTable tableName="product_categories" cascadeConstraints="true"/>
+    </changeSet>
+
+</databaseChangeLog>

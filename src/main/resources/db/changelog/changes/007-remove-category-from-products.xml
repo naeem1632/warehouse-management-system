@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- Remove category from products -->
+
+    <!-- Step 1: Drop foreign key constraint if it exists -->
+    <changeSet id="007-1-drop-products-category-fk" author="naeem">
+        <preConditions onFail="MARK_RAN">
+            <foreignKeyConstraintExists foreignKeyName="fk_products_category" foreignKeyTableName="products"/>
+        </preConditions>
+        <dropForeignKeyConstraint
+            baseTableName="products"
+            constraintName="fk_products_category"/>
+    </changeSet>
+
+    <!-- Step 2: Drop category_id column if it exists -->
+    <changeSet id="007-2-drop-category-id-column" author="naeem">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="products" columnName="category_id"/>
+        </preConditions>
+        <dropColumn tableName="products" columnName="category_id"/>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,7 +1,6 @@
 package com.warehouse.wms.repository;
 
 import com.warehouse.wms.entity.Product;
-import com.warehouse.wms.entity.ProductCategory;
 import com.warehouse.wms.enums.ProductStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -61,10 +60,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Deprecated
     List<Product> findByStatus(ProductStatus status);
-
-    List<Product> findByCategory(ProductCategory category);
-
-    List<Product> findByCategoryAndStatus(ProductCategory category, ProductStatus status);
 
     @Deprecated
     @Query("SELECT p FROM Product p WHERE p.status = :status ORDER BY p.name ASC")

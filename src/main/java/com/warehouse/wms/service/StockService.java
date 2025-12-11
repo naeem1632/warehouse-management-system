@@ -137,7 +137,6 @@ public class StockService {
 
     private StockCurrentDTO convertCurrentToDTO(StockCurrent current) {
         Product product = current.getProduct();
-        boolean isLowStock = current.getCurrentQuantity().compareTo(product.getMinimumStock()) <= 0;
 
         return StockCurrentDTO.builder()
             .id(current.getId())
@@ -148,9 +147,7 @@ public class StockService {
             .productSku(product.getSku())
             .productUnit(product.getUnit().getDisplayName())
             .currentQuantity(current.getCurrentQuantity())
-            .minimumStock(product.getMinimumStock())
             .lastUpdated(current.getLastUpdated())
-            .lowStock(isLowStock)
             .build();
     }
 }

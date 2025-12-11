@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- Modify audit_logs foreign key to allow ON DELETE SET NULL -->
+
+    <!-- Step 1: Drop existing foreign key constraint -->
+    <changeSet id="006-1-drop-audit-logs-warehouse-fk" author="naeem">
+        <dropForeignKeyConstraint
+            baseTableName="audit_logs"
+            constraintName="audit_logs_warehouse_id_fkey"/>
+    </changeSet>
+
+    <!-- Step 2: Make warehouse_id nullable if not already -->
+    <changeSet id="006-2-make-warehouse-id-nullable" author="naeem">
+        <dropNotNullConstraint
+            tableName="audit_logs"
+            columnName="warehouse_id"
+            columnDataType="BIGINT"/>
+    </changeSet>
+
+    <!-- Step 3: Add new foreign key with ON DELETE SET NULL -->
+    <changeSet id="006-3-add-audit-logs-warehouse-fk-on-delete-set-null" author="naeem">
+        <addForeignKeyConstraint
+            baseTableName="audit_logs"
+            baseColumnNames="warehouse_id"
+            constraintName="audit_logs_warehouse_id_fkey"
+            referencedTableName="warehouses"
+            referencedColumnNames="id"
+            onDelete="SET NULL"/>
+    </changeSet>
+
+</databaseChangeLog>

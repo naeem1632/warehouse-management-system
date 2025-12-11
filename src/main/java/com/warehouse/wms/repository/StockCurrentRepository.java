@@ -28,11 +28,11 @@ public interface StockCurrentRepository extends JpaRepository<StockCurrent, Long
         @Param("productId") Long productId
     );
 
+    // Low stock feature disabled - minimum stock field removed
+    // Returns empty list since there's no minimum stock threshold to compare against
     @Query("SELECT sc FROM StockCurrent sc " +
-           "JOIN sc.product p " +
            "WHERE sc.warehouse.id = :warehouseId AND " +
-           "sc.currentQuantity <= p.minimumStock " +
-           "ORDER BY sc.currentQuantity ASC")
+           "1 = 0")
     List<StockCurrent> findLowStockItems(@Param("warehouseId") Long warehouseId);
 
     @Query("SELECT sc FROM StockCurrent sc " +

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/main :: main(content=~{::content}, customCss=~{}, customJs=~{})}">
+<body>
+    <th:block th:fragment="content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h1>
+                        <i class="bi bi-box-seam"></i>
+                        <span th:text="${isEdit ? 'Edit Product' : 'Add New Product'}">Add Product</span>
+                    </h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a th:href="@{/products}">Products</a></li>
+                            <li class="breadcrumb-item active" th:text="${isEdit ? 'Edit' : 'Add New'}">Add</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12 col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Product Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/products/save}" th:object="${product}" method="post">
+                            <input type="hidden" th:field="*{id}"/>
+
+                            <!-- Warehouse Selection -->
+                            <div class="mb-3">
+                                <label for="warehouseId" class="form-label">
+                                    <i class="bi bi-building"></i> Warehouse <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" th:field="*{warehouseId}" required>
+                                    <option value="">Select warehouse</option>
+                                    <option th:each="warehouse : ${warehouses}"
+                                            th:value="${warehouse.id}"
+                                            th:text="${warehouse.name + ' (' + warehouse.code + ')'}">
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- SKU -->
+                            <div class="mb-3">
+                                <label for="sku" class="form-label">
+                                    <i class="bi bi-upc"></i> SKU <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" th:field="*{sku}" required>
+                            </div>
+
+                            <!-- Product Name -->
+                            <div class="mb-3">
+                                <label for="name" class="form-label">
+                                    <i class="bi bi-tag"></i> Product Name <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" th:field="*{name}" required>
+                            </div>
+
+                            <!-- Unit -->
+                            <div class="mb-3">
+                                <label for="unit" class="form-label">
+                                    <i class="bi bi-rulers"></i> Unit <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" th:field="*{unit}" required>
+                                    <option value="">Select unit</option>
+                                    <option th:each="unit : ${units}"
+                                            th:value="${unit}"
+                                            th:text="${unit}">
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="mb-3">
+                                <label for="description" class="form-label">
+                                    <i class="bi bi-card-text"></i> Description
+                                </label>
+                                <textarea class="form-control" th:field="*{description}" rows="3"></textarea>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="mb-3">
+                                <label for="status" class="form-label">
+                                    <i class="bi bi-toggle-on"></i> Status <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" th:field="*{status}" required>
+                                    <option value="">Select status</option>
+                                    <option th:each="status : ${statuses}"
+                                            th:value="${status}"
+                                            th:text="${status}">
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="d-flex justify-content-between">
+                                <a th:href="@{/products}" class="btn btn-secondary">
+                                    <i class="bi bi-x-circle"></i> Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle"></i>
+                                    <span th:text="${isEdit ? 'Update Product' : 'Create Product'}">Submit</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </th:block>
+</body>
+</html>

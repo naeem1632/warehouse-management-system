@@ -21,7 +21,5 @@ public class StockCurrentDTO {
     private String productSku;
     private String productUnit;
     private BigDecimal currentQuantity;
-    private BigDecimal minimumStock;
     private LocalDateTime lastUpdated;
-    private boolean lowStock;
 }

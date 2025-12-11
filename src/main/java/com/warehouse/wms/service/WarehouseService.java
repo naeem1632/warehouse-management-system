@@ -62,8 +62,8 @@ public class WarehouseService {
 
         // Get current user
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUserEmail = authentication.getName();
-        User currentUser = userRepository.findByEmail(currentUserEmail)
+        String currentUsername = authentication.getName();
+        User currentUser = userRepository.findByUsername(currentUsername)
                 .orElseThrow(() -> new RuntimeException("Current user not found"));
 
         Warehouse warehouse = new Warehouse();
@@ -121,13 +121,37 @@ public class WarehouseService {
     public void deleteWarehouse(Long id) {
         Warehouse warehouse = getWarehouseById(id);
 
+        // Check if warehouse has any operational data - prevent deletion if so
+        // Note: We allow deletion even if there are audit logs (they will be preserved with warehouse_id = NULL)
+
+        // Check for products
+        long productCount = warehouseRepository.countProductsByWarehouseId(id);
+        if (productCount > 0) {
+            throw new RuntimeException("Cannot delete warehouse '" + warehouse.getName() +
+                "'. It has " + productCount + " product(s) associated with it. Please remove or reassign the products first.");
+        }
+
+        // Check for stock movements
+        long stockMovementCount = warehouseRepository.countStockMovementsByWarehouseId(id);
+        if (stockMovementCount > 0) {
+            throw new RuntimeException("Cannot delete warehouse '" + warehouse.getName() +
+                "'. It has " + stockMovementCount + " stock movement(s). Warehouses with stock history cannot be deleted.");
+        }
+
+        // Check for purchases
+        long purchaseCount = warehouseRepository.countPurchasesByWarehouseId(id);
+        if (purchaseCount > 0) {
+            throw new RuntimeException("Cannot delete warehouse '" + warehouse.getName() +
+                "'. It has " + purchaseCount + " purchase(s). Warehouses with transaction history cannot be deleted.");
+        }
+
         // Store old values for audit
         Map<String, Object> oldValues = mapWarehouseToAudit(warehouse);
 
-        // Delete warehouse access
+        // Delete user-warehouse access mappings
         userWarehouseAccessRepository.deleteByWarehouseId(id);
 
-        // Delete warehouse
+        // Delete warehouse (audit logs will have warehouse_id set to NULL automatically)
         warehouseRepository.delete(warehouse);
 
         // Create audit log
@@ -136,8 +160,8 @@ public class WarehouseService {
 
     private void createAuditLog(Long warehouseCreatedBy, String tableName, Long recordId, AuditAction action, Map<String, Object> oldValue, Map<String, Object> newValue) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUserEmail = authentication.getName();
-        User currentUser = userRepository.findByEmail(currentUserEmail).orElse(null);
+        String currentUsername = authentication.getName();
+        User currentUser = userRepository.findByUsername(currentUsername).orElse(null);
 
         AuditLog auditLog = new AuditLog();
         auditLog.setUserId(currentUser != null ? currentUser.getId() : warehouseCreatedBy);

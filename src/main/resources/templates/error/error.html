@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/main :: main(content=~{::content}, customCss=~{::customCss}, customJs=~{})}">
+<body>
+    <th:block th:fragment="content">
+        <div class="container">
+            <div class="row justify-content-center mt-5">
+                <div class="col-12 col-md-8 col-lg-6">
+                    <div class="card border-danger">
+                        <div class="card-header bg-danger text-white">
+                            <h4 class="mb-0">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                <span th:text="${errorTitle ?: 'Error'}">Error</span>
+                            </h4>
+                        </div>
+                        <div class="card-body text-center py-5">
+                            <!-- Error Code -->
+                            <div class="display-1 text-danger mb-3" th:if="${errorCode}">
+                                <i class="bi bi-x-circle"></i>
+                            </div>
+                            <h1 class="text-danger mb-3" th:if="${errorCode}">
+                                <span th:text="${errorCode}">500</span>
+                            </h1>
+
+                            <!-- Error Title -->
+                            <h3 class="mb-3" th:text="${errorTitle ?: 'Something Went Wrong'}">
+                                Something Went Wrong
+                            </h3>
+
+                            <!-- Error Message -->
+                            <div class="alert alert-danger text-start" role="alert">
+                                <i class="bi bi-info-circle"></i>
+                                <strong>Details:</strong>
+                                <p class="mb-0 mt-2" th:text="${errorMessage ?: 'An unexpected error occurred. Please try again later.'}">
+                                    An unexpected error occurred.
+                                </p>
+                            </div>
+
+                            <!-- Request URL (for debugging) -->
+                            <div class="text-muted small mt-3" th:if="${requestUrl}">
+                                <strong>Request URL:</strong>
+                                <code th:text="${requestUrl}">/path</code>
+                            </div>
+
+                            <!-- Technical Details (optional, shown in dev mode) -->
+                            <div class="alert alert-warning text-start mt-3" role="alert" th:if="${technicalDetails}">
+                                <i class="bi bi-bug"></i>
+                                <strong>Technical Details:</strong>
+                                <p class="mb-0 mt-2 small" th:text="${technicalDetails}">
+                                    Technical error message
+                                </p>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="mt-4">
+                                <a href="javascript:history.back()" class="btn btn-secondary me-2">
+                                    <i class="bi bi-arrow-left"></i> Go Back
+                                </a>
+                                <a th:href="@{/dashboard}" class="btn btn-primary">
+                                    <i class="bi bi-house"></i> Go to Dashboard
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-footer text-muted text-center">
+                            <small>
+                                If this problem persists, please contact your system administrator.
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Help Card -->
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="bi bi-question-circle"></i> What can I do?
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="mb-0">
+                                <li>Try refreshing the page</li>
+                                <li>Go back and try a different action</li>
+                                <li>Return to the dashboard and start over</li>
+                                <li>Contact support if the issue continues</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </th:block>
+
+    <th:block th:fragment="customCss">
+        <style>
+            .display-1 {
+                font-size: 5rem;
+            }
+            code {
+                background-color: #f8f9fa;
+                padding: 2px 6px;
+                border-radius: 3px;
+            }
+        </style>
+    </th:block>
+</body>
+</html>

@@ -2,11 +2,9 @@ package com.warehouse.wms.service;
 
 import com.warehouse.wms.dto.ProductDTO;
 import com.warehouse.wms.entity.Product;
-import com.warehouse.wms.entity.ProductCategory;
 import com.warehouse.wms.entity.Warehouse;
 import com.warehouse.wms.enums.ProductStatus;
 import com.warehouse.wms.enums.ProductUnit;
-import com.warehouse.wms.repository.ProductCategoryRepository;
 import com.warehouse.wms.repository.ProductRepository;
 import com.warehouse.wms.repository.WarehouseRepository;
 import com.warehouse.wms.util.SecurityUtils;
@@ -26,7 +24,6 @@ import java.util.stream.Collectors;
 public class ProductService {
 
     private final ProductRepository productRepository;
-    private final ProductCategoryRepository categoryRepository;
     private final WarehouseRepository warehouseRepository;
 
     /**
@@ -131,20 +128,12 @@ public class ProductService {
                                      "'. Please use a different name or check existing products.");
         }
 
-        ProductCategory category = null;
-        if (dto.getCategoryId() != null) {
-            category = categoryRepository.findById(dto.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found with id: " + dto.getCategoryId()));
-        }
-
         Product product = Product.builder()
             .warehouse(warehouse)
             .sku(dto.getSku())
             .name(dto.getName())
-            .category(category)
             .unit(dto.getUnit() != null ? dto.getUnit() : ProductUnit.PCS)
             .description(dto.getDescription())
-            .minimumStock(dto.getMinimumStock() != null ? dto.getMinimumStock() : BigDecimal.ZERO)
             .status(dto.getStatus() != null ? dto.getStatus() : ProductStatus.ACTIVE)
             .build();
 
@@ -180,18 +169,10 @@ public class ProductService {
                                      "' already exists in this warehouse. Please use a different name.");
         }
 
-        ProductCategory category = null;
-        if (dto.getCategoryId() != null) {
-            category = categoryRepository.findById(dto.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found with id: " + dto.getCategoryId()));
-        }
-
         product.setSku(dto.getSku());
         product.setName(dto.getName());
-        product.setCategory(category);
         product.setUnit(dto.getUnit());
         product.setDescription(dto.getDescription());
-        product.setMinimumStock(dto.getMinimumStock());
         product.setStatus(dto.getStatus());
         product.setUpdatedAt(LocalDateTime.now());
 
@@ -219,11 +200,8 @@ public class ProductService {
             .warehouseName(product.getWarehouse() != null ? product.getWarehouse().getName() : null)
             .sku(product.getSku())
             .name(product.getName())
-            .categoryId(product.getCategory() != null ? product.getCategory().getId() : null)
-            .categoryName(product.getCategory() != null ? product.getCategory().getName() : null)
             .unit(product.getUnit())
             .description(product.getDescription())
-            .minimumStock(product.getMinimumStock())
             .status(product.getStatus())
             .build();
     }

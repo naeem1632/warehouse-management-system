@@ -20,4 +20,13 @@
     <!-- Product Management Updates: Warehouse-Specific Products -->
     <include file="db/changelog/changes/005-add-warehouse-to-products.xml"/>
 
+    <!-- Audit Logs: Modify warehouse foreign key to ON DELETE SET NULL -->
+    <include file="db/changelog/changes/006-modify-audit-logs-warehouse-fk.xml"/>
+
+    <!-- Products: Remove category references -->
+    <include file="db/changelog/changes/007-remove-category-from-products.xml"/>
+
+    <!-- Products: Remove product_categories table and minimum_stock column -->
+    <include file="db/changelog/changes/008-remove-product-categories-and-minimum-stock.xml"/>
+
 </databaseChangeLog>

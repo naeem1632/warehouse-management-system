@@ -36,6 +36,13 @@ spring:
     suffix: .html
     mode: HTML
 
+  mvc:
+    throw-exception-if-no-handler-found: true
+
+  web:
+    resources:
+      add-mappings: true
+
   security:
     user:
       name: admin
@@ -54,6 +61,8 @@ server:
   error:
     include-message: always
     include-stacktrace: on_param
+    whitelabel:
+      enabled: false
 
 logging:
   level:

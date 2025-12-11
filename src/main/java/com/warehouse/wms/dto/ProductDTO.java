@@ -19,10 +19,7 @@ public class ProductDTO {
     private String warehouseName;
     private String sku;
     private String name;
-    private Long categoryId;
-    private String categoryName;
     private ProductUnit unit;
     private String description;
-    private BigDecimal minimumStock;
     private ProductStatus status;
 }

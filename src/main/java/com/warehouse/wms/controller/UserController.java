@@ -71,6 +71,13 @@ public class UserController {
             Model model,
             RedirectAttributes redirectAttributes) {
 
+        // Manual password validation for create operation
+        if (userDTO.getPassword() == null || userDTO.getPassword().trim().isEmpty()) {
+            result.rejectValue("password", "error.password", "Password is required");
+        } else if (userDTO.getPassword().length() < 6) {
+            result.rejectValue("password", "error.password", "Password must be at least 6 characters");
+        }
+
         if (result.hasErrors()) {
             model.addAttribute("roles", UserRole.values());
             model.addAttribute("statuses", UserStatus.values());
@@ -134,6 +141,14 @@ public class UserController {
             BindingResult result,
             Model model,
             RedirectAttributes redirectAttributes) {
+
+        // Manual password validation for update operation
+        // Password is optional, but if provided, must be at least 6 characters
+        if (userDTO.getPassword() != null && !userDTO.getPassword().trim().isEmpty()) {
+            if (userDTO.getPassword().length() < 6) {
+                result.rejectValue("password", "error.password", "Password must be at least 6 characters");
+            }
+        }
 
         if (result.hasErrors()) {
             model.addAttribute("roles", UserRole.values());
