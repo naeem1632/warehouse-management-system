@@ -81,3 +81,5 @@ app:
   name: Warehouse Management System
   version: 1.0.0
   financial-year-start-month: 1
+  upload:
+    dir: uploads/purchases

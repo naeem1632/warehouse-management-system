@@ -94,10 +94,10 @@
                         </div>
                     </div>
 
-                    <!-- Weight Information -->
+                    <!-- Weight Information (Optional) -->
                     <div class="card mb-3">
                         <div class="card-header">
-                            <h5 class="mb-0"><i class="bi bi-speedometer2"></i> Weight Information</h5>
+                            <h5 class="mb-0"><i class="bi bi-speedometer2"></i> Weight Information (Optional - For Reference)</h5>
                         </div>
                         <div class="card-body">
                             <div class="row">
@@ -130,16 +130,17 @@
                                 <table class="table table-sm">
                                     <thead>
                                         <tr>
-                                            <th style="width: 40%;">Product</th>
+                                            <th style="width: 35%;">Product</th>
                                             <th style="width: 15%;">Quantity</th>
+                                            <th style="width: 10%;">Unit</th>
                                             <th style="width: 15%;">Rate</th>
-                                            <th style="width: 20%;">Amount</th>
+                                            <th style="width: 15%;">Amount</th>
                                             <th style="width: 10%;"></th>
                                         </tr>
                                     </thead>
                                     <tbody id="itemsTable">
                                         <tr>
-                                            <td colspan="5" class="text-center text-muted">Click "Add Item" to start adding products</td>
+                                            <td colspan="6" class="text-center text-muted">Click "Add Item" to start adding products</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -219,7 +220,7 @@
             function addItemRow() {
                 const tbody = document.getElementById('itemsTable');
                 // Remove "no items" message if it exists
-                if (tbody.children.length === 1 && tbody.children[0].children[0].colSpan === 5) {
+                if (tbody.children.length === 1 && tbody.children[0].children[0].colSpan === 6) {
                     tbody.innerHTML = '';
                 }
 
@@ -234,6 +235,9 @@
                     </td>
                     <td>
                         <input type="number" name="quantities" step="0.001" class="form-control form-control-sm" required onchange="calculateAmount(${itemCounter})">
+                    </td>
+                    <td>
+                        <span class="badge bg-info" id="unit-${itemCounter}">-</span>
                     </td>
                     <td>
                         <input type="number" name="rates" step="0.01" class="form-control form-control-sm" required onchange="calculateAmount(${itemCounter})">
@@ -251,13 +255,22 @@
                 itemCounter++;
             }
 
+            function updateProductUnit(index) {
+                const row = document.getElementById(`item-${index}`);
+                const select = row.querySelector('select[name="productIds"]');
+                const selectedOption = select.options[select.selectedIndex];
+                const unit = selectedOption.getAttribute('data-unit') || '-';
+                const unitBadge = document.getElementById(`unit-${index}`);
+                unitBadge.textContent = unit;
+            }
+
             function removeItemRow(index) {
                 const row = document.getElementById(`item-${index}`);
                 row.remove();
 
                 const tbody = document.getElementById('itemsTable');
                 if (tbody.children.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Click "Add Item" to start adding products</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Click "Add Item" to start adding products</td></tr>';
                 }
             }
 
