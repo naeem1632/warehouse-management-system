@@ -168,6 +168,60 @@
                         <p th:text="${purchase.notes}"></p>
                     </div>
                 </div>
+
+                <!-- Payment History -->
+                <div class="card mb-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-wallet2"></i> Payment History</h5>
+                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addPaymentModal">
+                            <i class="bi bi-plus-circle"></i> Add Payment
+                        </button>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-sm mb-0" id="paymentsTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Amount</th>
+                                        <th>Method</th>
+                                        <th>Reference</th>
+                                        <th>By</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted">Loading payments...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attachments -->
+                <div class="card mb-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-paperclip"></i> Attachments</h5>
+                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#uploadAttachmentModal">
+                            <i class="bi bi-upload"></i> Upload File
+                        </button>
+                    </div>
+                    <div class="card-body" id="attachmentsContainer">
+                        <p class="text-center text-muted">Loading attachments...</p>
+                    </div>
+                </div>
+
+                <!-- Audit Trail -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-clock-history"></i> Change History</h5>
+                    </div>
+                    <div class="card-body" id="auditLogsContainer">
+                        <p class="text-center text-muted">Loading audit logs...</p>
+                    </div>
+                </div>
             </div>
 
             <div class="col-lg-4">
@@ -220,8 +274,336 @@
         </div>
     </th:block>
 
+        <!-- Add Payment Modal -->
+        <div class="modal fade" id="addPaymentModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Add Payment</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="addPaymentForm">
+                            <div class="mb-3">
+                                <label class="form-label">Payment Date *</label>
+                                <input type="date" class="form-control" id="paymentDate" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Amount *</label>
+                                <input type="number" step="0.01" class="form-control" id="paymentAmount" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Payment Method *</label>
+                                <select class="form-select" id="paymentMethod" required>
+                                    <option value="">Select Method</option>
+                                    <option value="CASH">Cash</option>
+                                    <option value="BANK_TRANSFER">Bank Transfer</option>
+                                    <option value="CHECK">Check</option>
+                                    <option value="ONLINE">Online</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Reference Number</label>
+                                <input type="text" class="form-control" id="referenceNumber">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Notes</label>
+                                <textarea class="form-control" id="paymentNotes" rows="2"></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="savePayment()">Save Payment</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Attachment Modal -->
+        <div class="modal fade" id="uploadAttachmentModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Upload Attachment</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="uploadAttachmentForm">
+                            <div class="mb-3">
+                                <label class="form-label">Attachment Type *</label>
+                                <select class="form-select" id="attachmentType" required>
+                                    <option value="">Select Type</option>
+                                    <option value="GATE_PASS">Gate Pass</option>
+                                    <option value="INVOICE">Invoice</option>
+                                    <option value="QUALITY_CERT">Quality Certificate</option>
+                                    <option value="DELIVERY_CHALLAN">Delivery Challan</option>
+                                    <option value="OTHER">Other</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">File *</label>
+                                <input type="file" class="form-control" id="attachmentFile" required>
+                                <small class="text-muted">Max file size: 10MB. Supported: PDF, JPG, PNG</small>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="uploadAttachment()">Upload</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </th:block>
+
     <th:block th:fragment="customJs">
-        <script>
+        <script th:inline="javascript">
+            const purchaseId = /*[[${purchase.id}]]*/ 0;
+
+            // Load all data on page load
+            document.addEventListener('DOMContentLoaded', function() {
+                loadPayments();
+                loadAttachments();
+                loadAuditLogs();
+            });
+
+            // ========== PAYMENTS ==========
+            function loadPayments() {
+                fetch(`/api/purchases/${purchaseId}/payments`)
+                    .then(response => response.json())
+                    .then(payments => {
+                        const tbody = document.querySelector('#paymentsTable tbody');
+
+                        if (payments.length === 0) {
+                            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No payments recorded yet</td></tr>';
+                            return;
+                        }
+
+                        tbody.innerHTML = payments.map(p => `
+                            <tr>
+                                <td>${new Date(p.paymentDate).toLocaleDateString()}</td>
+                                <td><strong>${Number(p.amount).toFixed(2)}</strong></td>
+                                <td><span class="badge bg-secondary">${p.paymentMethod}</span></td>
+                                <td>${p.referenceNumber || '-'}</td>
+                                <td><small>${p.createdByName || 'N/A'}</small></td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-danger" onclick="deletePayment(${p.id})">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('');
+
+                        // Reload page to update payment summary
+                        updatePaymentSummary();
+                    })
+                    .catch(error => {
+                        console.error('Error loading payments:', error);
+                        document.querySelector('#paymentsTable tbody').innerHTML =
+                            '<tr><td colspan="6" class="text-center text-danger">Error loading payments</td></tr>';
+                    });
+            }
+
+            function savePayment() {
+                const paymentData = {
+                    paymentDate: document.getElementById('paymentDate').value,
+                    amount: parseFloat(document.getElementById('paymentAmount').value),
+                    paymentMethod: document.getElementById('paymentMethod').value,
+                    referenceNumber: document.getElementById('referenceNumber').value,
+                    notes: document.getElementById('paymentNotes').value
+                };
+
+                if (!paymentData.paymentDate || !paymentData.amount || !paymentData.paymentMethod) {
+                    alert('Please fill in all required fields');
+                    return;
+                }
+
+                fetch(`/api/purchases/${purchaseId}/payments`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(paymentData)
+                })
+                .then(response => response.json())
+                .then(() => {
+                    bootstrap.Modal.getInstance(document.getElementById('addPaymentModal')).hide();
+                    document.getElementById('addPaymentForm').reset();
+                    loadPayments();
+                    location.reload(); // Reload to update payment summary
+                })
+                .catch(error => {
+                    console.error('Error saving payment:', error);
+                    alert('Error saving payment. Please try again.');
+                });
+            }
+
+            function deletePayment(paymentId) {
+                if (!confirm('Are you sure you want to delete this payment?')) return;
+
+                fetch(`/api/purchases/payments/${paymentId}`, {
+                    method: 'DELETE'
+                })
+                .then(() => {
+                    loadPayments();
+                    location.reload(); // Reload to update payment summary
+                })
+                .catch(error => {
+                    console.error('Error deleting payment:', error);
+                    alert('Error deleting payment. Please try again.');
+                });
+            }
+
+            function updatePaymentSummary() {
+                // This will be handled by page reload
+            }
+
+            // ========== ATTACHMENTS ==========
+            function loadAttachments() {
+                fetch(`/api/purchases/${purchaseId}/attachments`)
+                    .then(response => response.json())
+                    .then(attachments => {
+                        const container = document.getElementById('attachmentsContainer');
+
+                        if (attachments.length === 0) {
+                            container.innerHTML = '<p class="text-center text-muted">No attachments uploaded yet</p>';
+                            return;
+                        }
+
+                        container.innerHTML = attachments.map(a => `
+                            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                                <div>
+                                    <i class="bi bi-file-earmark-${getFileIcon(a.fileType)} me-2"></i>
+                                    <strong>${a.originalFileName}</strong>
+                                    <br>
+                                    <small class="text-muted">
+                                        ${a.attachmentType} • ${formatFileSize(a.fileSize)} •
+                                        ${new Date(a.uploadedAt).toLocaleDateString()}
+                                    </small>
+                                </div>
+                                <div>
+                                    <a href="/api/purchases/attachments/${a.id}/download" class="btn btn-sm btn-outline-primary me-1">
+                                        <i class="bi bi-download"></i>
+                                    </a>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteAttachment(${a.id})">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('');
+                    })
+                    .catch(error => {
+                        console.error('Error loading attachments:', error);
+                        document.getElementById('attachmentsContainer').innerHTML =
+                            '<p class="text-center text-danger">Error loading attachments</p>';
+                    });
+            }
+
+            function uploadAttachment() {
+                const fileInput = document.getElementById('attachmentFile');
+                const attachmentType = document.getElementById('attachmentType').value;
+
+                if (!fileInput.files.length || !attachmentType) {
+                    alert('Please select a file and attachment type');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                formData.append('attachmentType', attachmentType);
+
+                fetch(`/api/purchases/${purchaseId}/attachments`, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(() => {
+                    bootstrap.Modal.getInstance(document.getElementById('uploadAttachmentModal')).hide();
+                    document.getElementById('uploadAttachmentForm').reset();
+                    loadAttachments();
+                })
+                .catch(error => {
+                    console.error('Error uploading attachment:', error);
+                    alert('Error uploading file. Please try again.');
+                });
+            }
+
+            function deleteAttachment(attachmentId) {
+                if (!confirm('Are you sure you want to delete this attachment?')) return;
+
+                fetch(`/api/purchases/attachments/${attachmentId}`, {
+                    method: 'DELETE'
+                })
+                .then(() => loadAttachments())
+                .catch(error => {
+                    console.error('Error deleting attachment:', error);
+                    alert('Error deleting attachment. Please try again.');
+                });
+            }
+
+            function getFileIcon(fileType) {
+                if (!fileType) return 'text';
+                if (fileType.includes('pdf')) return 'pdf';
+                if (fileType.includes('image')) return 'image';
+                if (fileType.includes('word') || fileType.includes('doc')) return 'word';
+                if (fileType.includes('excel') || fileType.includes('sheet')) return 'excel';
+                return 'text';
+            }
+
+            function formatFileSize(bytes) {
+                if (!bytes) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+            }
+
+            // ========== AUDIT LOGS ==========
+            function loadAuditLogs() {
+                fetch(`/api/purchases/${purchaseId}/audit-logs`)
+                    .then(response => response.json())
+                    .then(logs => {
+                        const container = document.getElementById('auditLogsContainer');
+
+                        if (logs.length === 0) {
+                            container.innerHTML = '<p class="text-center text-muted">No change history available</p>';
+                            return;
+                        }
+
+                        container.innerHTML = '<div class="timeline">' + logs.map(log => `
+                            <div class="timeline-item mb-3">
+                                <div class="d-flex">
+                                    <div class="me-3">
+                                        <i class="bi bi-${getActionIcon(log.action)} text-primary"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <strong>${log.action}</strong>
+                                        ${log.fieldName ? ` - ${log.fieldName}` : ''}
+                                        <br>
+                                        ${log.notes ? `<small class="text-muted">${log.notes}</small><br>` : ''}
+                                        <small class="text-muted">
+                                            ${new Date(log.changedAt).toLocaleString()} by ${log.changedByName || 'System'}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('') + '</div>';
+                    })
+                    .catch(error => {
+                        console.error('Error loading audit logs:', error);
+                        document.getElementById('auditLogsContainer').innerHTML =
+                            '<p class="text-center text-danger">Error loading audit logs</p>';
+                    });
+            }
+
+            function getActionIcon(action) {
+                const icons = {
+                    'CREATED': 'plus-circle',
+                    'UPDATED': 'pencil',
+                    'DELETED': 'trash',
+                    'STATUS_CHANGED': 'arrow-repeat'
+                };
+                return icons[action] || 'circle';
+            }
         </script>
     </th:block>
 </body>
