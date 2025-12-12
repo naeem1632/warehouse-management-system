@@ -51,6 +51,33 @@ public class PurchaseAttachmentController {
                 .body(resource);
     }
 
+    @GetMapping("/attachments/{attachmentId}/view")
+    public ResponseEntity<Resource> viewAttachment(@PathVariable Long attachmentId) throws MalformedURLException {
+        Resource resource = purchaseAttachmentService.downloadAttachment(attachmentId);
+        String filename = purchaseAttachmentService.getOriginalFileName(attachmentId);
+        String contentType = purchaseAttachmentService.getContentType(attachmentId);
+
+        // Determine media type
+        MediaType mediaType;
+        if (contentType != null && !contentType.isEmpty()) {
+            mediaType = MediaType.parseMediaType(contentType);
+        } else {
+            // Fallback based on file extension
+            if (filename.toLowerCase().endsWith(".pdf")) {
+                mediaType = MediaType.APPLICATION_PDF;
+            } else if (filename.toLowerCase().matches(".*\\.(jpg|jpeg|png|gif|bmp)$")) {
+                mediaType = MediaType.IMAGE_JPEG; // Will be corrected by browser
+            } else {
+                mediaType = MediaType.APPLICATION_OCTET_STREAM;
+            }
+        }
+
+        return ResponseEntity.ok()
+                .contentType(mediaType)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
+                .body(resource);
+    }
+
     @DeleteMapping("/attachments/{attachmentId}")
     @ResponseBody
     public ResponseEntity<Void> deleteAttachment(@PathVariable Long attachmentId) throws IOException {

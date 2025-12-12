@@ -132,8 +132,6 @@ public class PurchaseController {
         model.addAttribute("warehouses", accessibleWarehouses);
         model.addAttribute("products", productService.getAllActiveProducts());
         model.addAttribute("paymentMethods", PaymentMethod.values());
-        model.addAttribute("paymentStatuses", PaymentStatus.values());
-        model.addAttribute("purchaseStatuses", PurchaseStatus.values());
 
         return "purchases/form";
     }
@@ -146,12 +144,8 @@ public class PurchaseController {
             // Validate warehouse access
             SecurityUtils.validateWarehouseAccess(purchase.getWarehouseId());
 
-            // Check if purchase can be edited
-            if (purchase.getStatus() == PurchaseStatus.COMPLETED) {
-                redirectAttributes.addFlashAttribute("error",
-                    "Cannot edit completed purchase. Create a new purchase or adjustment instead.");
-                return "redirect:/purchases";
-            }
+            // Note: Removed restriction on editing completed purchases
+            // All edits are now allowed and will be logged in the audit trail
 
             // Get accessible warehouses
             List<Warehouse> accessibleWarehouses;
@@ -167,8 +161,6 @@ public class PurchaseController {
             model.addAttribute("warehouses", accessibleWarehouses);
             model.addAttribute("products", productService.getAllActiveProducts());
             model.addAttribute("paymentMethods", PaymentMethod.values());
-            model.addAttribute("paymentStatuses", PaymentStatus.values());
-            model.addAttribute("purchaseStatuses", PurchaseStatus.values());
 
             return "purchases/form";
         } catch (Exception e) {

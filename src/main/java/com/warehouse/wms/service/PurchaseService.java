@@ -119,7 +119,7 @@ public class PurchaseService {
                 .paymentStatus(paymentStatus)
                 .paymentMethod(dto.getPaymentMethod())
                 .notes(dto.getNotes())
-                .status(dto.getStatus() != null ? dto.getStatus() : PurchaseStatus.COMPLETED)
+                .status(PurchaseStatus.COMPLETED) // Always set to COMPLETED (required for stock tracking)
                 .createdBy(user)
                 .build();
 
@@ -145,30 +145,28 @@ public class PurchaseService {
             purchaseItemRepository.save(item);
 
             // Update stock - PURCHASE movement (positive quantity)
-            if (purchase.getStatus() == PurchaseStatus.COMPLETED) {
-                StockMovementDTO stockMovement = StockMovementDTO.builder()
-                        .warehouseId(warehouse.getId())
-                        .productId(product.getId())
-                        .movementType(MovementType.PURCHASE)
-                        .quantity(itemDto.getQuantity())
-                        .rate(itemDto.getRate())
-                        .referenceType("purchase")
-                        .referenceId(purchase.getId())
-                        .notes("Purchase #" + purchase.getPurchaseNumber())
-                        .build();
+            // All purchases automatically update stock
+            StockMovementDTO stockMovement = StockMovementDTO.builder()
+                    .warehouseId(warehouse.getId())
+                    .productId(product.getId())
+                    .movementType(MovementType.PURCHASE)
+                    .quantity(itemDto.getQuantity())
+                    .rate(itemDto.getRate())
+                    .referenceType("purchase")
+                    .referenceId(purchase.getId())
+                    .notes("Purchase #" + purchase.getPurchaseNumber())
+                    .build();
 
-                stockService.recordMovement(stockMovement, currentUserId);
-            }
+            stockService.recordMovement(stockMovement, currentUserId);
         }
 
         // Update supplier ledger (Debit entry - increases payable)
-        if (purchase.getStatus() == PurchaseStatus.COMPLETED) {
-            supplierService.updateSupplierLedger(supplier, totalAmount, "DEBIT",
-                    "purchase", purchase.getId(), currentUserId);
-        }
+        // All purchases automatically update supplier ledger
+        supplierService.updateSupplierLedger(supplier, totalAmount, "DEBIT",
+                "purchase", purchase.getId(), currentUserId);
 
         // If payment made, create credit entry
-        if (paidAmount.compareTo(BigDecimal.ZERO) > 0 && purchase.getStatus() == PurchaseStatus.COMPLETED) {
+        if (paidAmount.compareTo(BigDecimal.ZERO) > 0) {
             supplierService.updateSupplierLedger(supplier, paidAmount, "CREDIT",
                     "purchase_payment", purchase.getId(), currentUserId);
         }
@@ -279,10 +277,9 @@ public class PurchaseService {
         Purchase purchase = purchaseRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Purchase not found with id: " + id));
 
-        // Cannot delete completed purchases
-        if (purchase.getStatus() == PurchaseStatus.COMPLETED) {
-            throw new RuntimeException("Cannot delete completed purchase with stock movements");
-        }
+        // Note: Removed restriction on deleting completed purchases
+        // All deletions are now allowed but require confirmation from the user
+        // This will also delete related stock movements, payments, and attachments (cascade delete)
 
         purchaseRepository.delete(purchase);
 

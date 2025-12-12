@@ -87,13 +87,12 @@
                                 <th>Total Amount</th>
                                 <th>Paid</th>
                                 <th>Payment Status</th>
-                                <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:if="${#lists.isEmpty(purchases)}">
-                                <td colspan="9" class="text-center py-4 text-muted">
+                                <td colspan="8" class="text-center py-4 text-muted">
                                     <i class="bi bi-inbox" style="font-size: 2rem;"></i>
                                     <p class="mb-0 mt-2">No purchases found</p>
                                 </td>
@@ -114,24 +113,17 @@
                                     <span th:if="${purchase.paymentStatus?.name() == 'PENDING'}" class="badge bg-danger">Pending</span>
                                 </td>
                                 <td>
-                                    <span th:if="${purchase.status?.name() == 'COMPLETED'}" class="badge bg-success">Completed</span>
-                                    <span th:if="${purchase.status?.name() == 'DRAFT'}" class="badge bg-secondary">Draft</span>
-                                    <span th:if="${purchase.status?.name() == 'CANCELLED'}" class="badge bg-danger">Cancelled</span>
-                                </td>
-                                <td>
                                     <div class="btn-group btn-group-sm">
                                         <a th:href="@{/purchases/{id}(id=${purchase.id})}" class="btn btn-outline-info" title="View">
                                             <i class="bi bi-eye"></i>
                                         </a>
                                         <a th:href="@{/purchases/{id}/edit(id=${purchase.id})}"
-                                           th:if="${purchase.status?.name() != 'COMPLETED'}"
                                            class="btn btn-outline-warning" title="Edit">
                                             <i class="bi bi-pencil"></i>
                                         </a>
-                                        <form th:action="@{/purchases/{id}/delete(id=${purchase.id})}" method="post"
-                                              th:if="${purchase.status?.name() != 'COMPLETED'}" style="display:inline;">
+                                        <form th:action="@{/purchases/{id}/delete(id=${purchase.id})}" method="post" style="display:inline;">
                                             <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete"
-                                                    onclick="return confirm('Are you sure you want to delete this purchase?')">
+                                                    onclick="return confirm('Are you sure you want to delete this purchase?\n\nThis will also delete:\n- All purchase items\n- Payment records\n- Attachments\n- Audit history\n- Related stock movements\n\nThis action cannot be undone!')">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </form>

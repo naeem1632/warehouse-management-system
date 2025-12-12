@@ -27,20 +27,32 @@ public class PurchaseAuditService {
     private final UserRepository userRepository;
 
     public List<PurchaseAuditLogDTO> getAuditLogsByPurchaseId(Long purchaseId) {
-        return auditLogRepository.findByPurchaseIdOrderByChangedAtDesc(purchaseId)
-                .stream()
+        System.out.println("=== Getting audit logs for purchase: " + purchaseId);
+        List<PurchaseAuditLog> logs = auditLogRepository.findByPurchaseIdOrderByChangedAtDesc(purchaseId);
+        System.out.println("Found " + logs.size() + " audit logs");
+
+        List<PurchaseAuditLogDTO> dtos = logs.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+
+        System.out.println("Returning " + dtos.size() + " audit log DTOs");
+        return dtos;
     }
 
     public void logPurchaseChange(Long purchaseId, String action, String fieldName, String oldValue, String newValue, String notes) {
+        System.out.println("=== Logging purchase change for purchase: " + purchaseId);
+        System.out.println("Action: " + action + ", Notes: " + notes);
+
         Purchase purchase = purchaseRepository.findById(purchaseId)
                 .orElseThrow(() -> new RuntimeException("Purchase not found with id: " + purchaseId));
 
         // Get current user
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = authentication.getName();
+        System.out.println("Current username: " + currentUsername);
+
         User currentUser = userRepository.findByUsername(currentUsername).orElse(null);
+        System.out.println("Current user: " + (currentUser != null ? currentUser.getId() : "null"));
 
         PurchaseAuditLog log = PurchaseAuditLog.builder()
                 .purchase(purchase)
@@ -53,14 +65,17 @@ public class PurchaseAuditService {
                 .notes(notes)
                 .build();
 
-        auditLogRepository.save(log);
+        PurchaseAuditLog saved = auditLogRepository.save(log);
+        System.out.println("Audit log saved with ID: " + saved.getId());
     }
 
     public void logPurchaseCreation(Long purchaseId) {
+        System.out.println("=== Logging purchase CREATION for purchase: " + purchaseId);
         logPurchaseChange(purchaseId, "CREATED", null, null, null, "Purchase created");
     }
 
     public void logPurchaseUpdate(Long purchaseId, String notes) {
+        System.out.println("=== Logging purchase UPDATE for purchase: " + purchaseId);
         logPurchaseChange(purchaseId, "UPDATED", null, null, null, notes);
     }
 

@@ -40,30 +40,48 @@ public class PurchaseAttachmentService {
     private String uploadDir;
 
     public List<PurchaseAttachmentDTO> getAttachmentsByPurchaseId(Long purchaseId) {
-        return purchaseAttachmentRepository.findByPurchaseIdOrderByUploadedAtDesc(purchaseId)
-                .stream()
+        System.out.println("=== Getting attachments for purchase: " + purchaseId);
+        List<PurchaseAttachment> attachments = purchaseAttachmentRepository.findByPurchaseIdOrderByUploadedAtDesc(purchaseId);
+        System.out.println("Found " + attachments.size() + " attachments in database");
+
+        List<PurchaseAttachmentDTO> dtos = attachments.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+
+        System.out.println("Returning " + dtos.size() + " attachment DTOs");
+        return dtos;
     }
 
     public PurchaseAttachmentDTO uploadAttachment(Long purchaseId, MultipartFile file, String attachmentType) throws IOException {
+        System.out.println("=== Starting file upload for purchase: " + purchaseId);
+        System.out.println("File name: " + file.getOriginalFilename());
+        System.out.println("File size: " + file.getSize());
+        System.out.println("Attachment type: " + attachmentType);
+
         if (file.isEmpty()) {
             throw new RuntimeException("Cannot upload empty file");
         }
 
         Purchase purchase = purchaseRepository.findById(purchaseId)
                 .orElseThrow(() -> new RuntimeException("Purchase not found with id: " + purchaseId));
+        System.out.println("Purchase found: " + purchase.getId());
 
         // Get current user
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = authentication.getName();
+        System.out.println("Current username: " + currentUsername);
+
         User currentUser = userRepository.findByUsername(currentUsername)
                 .orElseThrow(() -> new RuntimeException("Current user not found"));
+        System.out.println("Current user found: " + currentUser.getId());
 
         // Create upload directory if it doesn't exist
         Path uploadPath = Paths.get(uploadDir, purchaseId.toString());
+        System.out.println("Upload path: " + uploadPath.toAbsolutePath());
+
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
+            System.out.println("Created upload directory");
         }
 
         // Generate unique filename
@@ -72,10 +90,12 @@ public class PurchaseAttachmentService {
                 ? originalFilename.substring(originalFilename.lastIndexOf("."))
                 : "";
         String uniqueFilename = UUID.randomUUID().toString() + fileExtension;
+        System.out.println("Generated unique filename: " + uniqueFilename);
 
         // Save file to disk
         Path filePath = uploadPath.resolve(uniqueFilename);
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        System.out.println("File saved to disk: " + filePath.toAbsolutePath());
 
         // Save attachment metadata to database
         PurchaseAttachment attachment = PurchaseAttachment.builder()
@@ -89,8 +109,13 @@ public class PurchaseAttachmentService {
                 .uploadedBy(currentUser)
                 .build();
 
+        System.out.println("Saving attachment to database...");
         PurchaseAttachment saved = purchaseAttachmentRepository.save(attachment);
-        return convertToDTO(saved);
+        System.out.println("Attachment saved with ID: " + saved.getId());
+
+        PurchaseAttachmentDTO dto = convertToDTO(saved);
+        System.out.println("=== Upload completed successfully, returning DTO");
+        return dto;
     }
 
     public Resource downloadAttachment(Long attachmentId) throws MalformedURLException {
@@ -123,6 +148,12 @@ public class PurchaseAttachmentService {
         PurchaseAttachment attachment = purchaseAttachmentRepository.findById(attachmentId)
                 .orElseThrow(() -> new RuntimeException("Attachment not found with id: " + attachmentId));
         return attachment.getOriginalFileName();
+    }
+
+    public String getContentType(Long attachmentId) {
+        PurchaseAttachment attachment = purchaseAttachmentRepository.findById(attachmentId)
+                .orElseThrow(() -> new RuntimeException("Attachment not found with id: " + attachmentId));
+        return attachment.getFileType();
     }
 
     private PurchaseAttachmentDTO convertToDTO(PurchaseAttachment attachment) {
