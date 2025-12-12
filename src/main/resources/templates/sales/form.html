@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/main :: main(content=~{::content}, customCss=~{}, customJs=~{::customJs})}">
+<body><th:block th:fragment="content">
+<div class="page-header"><h1><i class="bi bi-cart-check"></i> New Sale</h1></div>
+<form th:action="@{/sales}" method="post" th:object="${sale}">
+<div class="card mb-3"><div class="card-header"><h5>Sale Information</h5></div><div class="card-body"><div class="row">
+<div class="col-md-4 mb-3"><label>Sale Date <span class="text-danger">*</span></label><input type="date" class="form-control" th:field="*{saleDate}" required></div>
+<div class="col-md-4 mb-3"><label>Customer <span class="text-danger">*</span></label><select class="form-select" th:field="*{customerId}" required>
+<option value="">Select Customer</option><option th:each="customer : ${customers}" th:value="${customer.id}" th:text="${customer.name}"></option></select></div>
+<div class="col-md-4 mb-3"><label>Warehouse <span class="text-danger">*</span></label><select class="form-select" th:field="*{warehouseId}" required>
+<option value="">Select Warehouse</option><option th:each="warehouse : ${warehouses}" th:value="${warehouse.id}" th:text="${warehouse.name}"></option></select></div>
+</div></div></div>
+<div class="card mb-3"><div class="card-header"><h5>Sale Items</h5></div><div class="card-body"><div id="itemsContainer">
+<div class="item-row row mb-2"><div class="col-md-4"><select class="form-select" name="productIds" required>
+<option value="">Select Product</option><option th:each="product : ${products}" th:value="${product.id}" th:text="${product.name + ' (' + product.sku + ')'}"></option></select></div>
+<div class="col-md-2"><input type="number" class="form-control" name="quantities" placeholder="Qty" step="0.01" required></div>
+<div class="col-md-2"><input type="number" class="form-control" name="rates" placeholder="Rate" step="0.01" required></div>
+<div class="col-md-2"><input type="number" class="form-control" name="discountAmounts" placeholder="Discount" step="0.01" value="0"></div>
+<div class="col-md-2"><button type="button" class="btn btn-danger btn-sm" onclick="removeItem(this)"><i class="bi bi-trash"></i></button></div></div></div>
+<button type="button" class="btn btn-secondary btn-sm mt-2" onclick="addItem()"><i class="bi bi-plus"></i> Add Item</button></div></div>
+<div class="card mb-3"><div class="card-header"><h5>Payment</h5></div><div class="card-body"><div class="row">
+<div class="col-md-4 mb-3"><label>Overall Discount</label><input type="number" class="form-control" th:field="*{discount}" step="0.01" value="0"></div>
+<div class="col-md-4 mb-3"><label>Received Amount</label><input type="number" class="form-control" th:field="*{receivedAmount}" step="0.01" value="0"></div>
+<div class="col-md-4 mb-3"><label>Payment Method</label><select class="form-select" th:field="*{paymentMethod}"><option value="">Select</option>
+<option th:each="method : ${paymentMethods}" th:value="${method}" th:text="${method}"></option></select></div>
+<div class="col-12 mb-3"><label>Notes</label><textarea class="form-control" th:field="*{notes}" rows="2"></textarea></div></div></div></div>
+<div class="d-flex justify-content-between"><a th:href="@{/sales}" class="btn btn-secondary"><i class="bi bi-x-circle"></i> Cancel</a>
+<button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Create Sale</button></div>
+</form></th:block>
+<th:block th:fragment="customJs"><script>
+function addItem(){var c=document.getElementById("itemsContainer");var d=c.firstElementChild.cloneNode(true);
+d.querySelectorAll("input").forEach(e=>e.value="");d.querySelectorAll("select").forEach(e=>e.selectedIndex=0);c.appendChild(d);}
+function removeItem(b){if(document.querySelectorAll(".item-row").length>1){b.closest(".item-row").remove();}}
+</script></th:block></body></html>

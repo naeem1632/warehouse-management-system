@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/main :: main(content=~{::content}, customCss=~{}, customJs=~{})}">
+<body><th:block th:fragment="content">
+<div class="page-header"><div class="row"><div class="col"><h1><i class="bi bi-cart-check"></i> Sales Management</h1></div>
+<div class="col-auto"><a th:href="@{/sales/create}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> New Sale</a></div></div></div>
+<div th:if="${success}" class="alert alert-success alert-dismissible fade show"><i class="bi bi-check-circle"></i> <span th:text="${success}"></span>
+<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+<div class="card mb-3"><div class="card-body"><form th:action="@{/sales}" method="get" class="row g-3">
+<div class="col-md-5"><label>Warehouse</label><select name="warehouseId" class="form-select"><option value="">All Warehouses</option>
+<option th:each="warehouse : ${warehouses}" th:value="${warehouse.id}" th:text="${warehouse.name}" th:selected="${warehouseId == warehouse.id}"></option></select></div>
+<div class="col-md-5"><label>Customer</label><select name="customerId" class="form-select"><option value="">All Customers</option>
+<option th:each="customer : ${customers}" th:value="${customer.id}" th:text="${customer.name}" th:selected="${customerId == customer.id}"></option></select></div>
+<div class="col-md-2"><label>&nbsp;</label><button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel"></i> Filter</button></div></form></div></div>
+<div class="card"><div class="card-header"><h5>All Sales (<span th:text="${totalItems}">0</span>)</h5></div><div class="card-body p-0"><div class="table-responsive">
+<table class="table table-hover mb-0"><thead class="table-light"><tr><th>Sale #</th><th>Invoice #</th><th>Date</th><th>Customer</th>
+<th>Warehouse</th><th>Total Amount</th><th>Received</th><th>Payment Status</th><th>Actions</th></tr></thead><tbody>
+<tr th:if="${#lists.isEmpty(sales)}"><td colspan="9" class="text-center py-4">No sales found</td></tr>
+<tr th:each="sale : ${sales}"><td><strong th:text="${sale.saleNumber}"></strong></td><td th:text="${sale.invoiceNumber}"></td>
+<td th:text="${#temporals.format(sale.saleDate, 'dd-MMM-yyyy')}"></td>
+<td><div th:text="${sale.customerName}"></div><small class="text-muted" th:text="${sale.customerCode}"></small></td>
+<td th:text="${sale.warehouseName}"></td><td th:text="${#numbers.formatDecimal(sale.totalAmount, 1, 2)}"></td>
+<td th:text="${#numbers.formatDecimal(sale.receivedAmount, 1, 2)}"></td>
+<td><span th:if="${sale.paymentStatus?.name() == 'PAID'}" class="badge bg-success">Paid</span>
+<span th:if="${sale.paymentStatus?.name() == 'PARTIAL'}" class="badge bg-warning">Partial</span>
+<span th:if="${sale.paymentStatus?.name() == 'PENDING'}" class="badge bg-danger">Pending</span></td>
+<td><div class="btn-group btn-group-sm"><a th:href="@{/sales/{id}(id=${sale.id})}" class="btn btn-outline-info" title="View"><i class="bi bi-eye"></i></a>
+<form th:action="@{/sales/{id}/delete(id=${sale.id})}" method="post" style="display:inline;"><button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Delete this sale?')"><i class="bi bi-trash"></i></button></form></div></td></tr>
+</tbody></table></div></div>
+<div class="card-footer" th:if="${totalPages > 1}"><nav><ul class="pagination justify-content-center mb-0">
+<li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'"><a class="page-link" th:href="@{/sales(page=${currentPage - 1})}">Previous</a></li>
+<li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${i == currentPage} ? 'active'">
+<a class="page-link" th:href="@{/sales(page=${i})}" th:text="${i + 1}"></a></li>
+<li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'"><a class="page-link" th:href="@{/sales(page=${currentPage + 1})}">Next</a></li>
+</ul></nav></div></div>
+</th:block></body></html>
