@@ -3,6 +3,7 @@ package com.warehouse.wms.service;
 import com.warehouse.wms.dto.ReportSummaryDTO;
 import com.warehouse.wms.dto.SalesReportDTO;
 import com.warehouse.wms.entity.Sale;
+import com.warehouse.wms.repository.SaleItemRepository;
 import com.warehouse.wms.repository.SaleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 public class SalesReportService {
 
     private final SaleRepository saleRepository;
+    private final SaleItemRepository saleItemRepository;
 
     @Transactional(readOnly = true)
     public List<SalesReportDTO> getSalesReport(Long warehouseId, Long customerId,
@@ -60,6 +62,9 @@ public class SalesReportService {
         BigDecimal receivedAmount = sale.getReceivedAmount() != null ? sale.getReceivedAmount() : BigDecimal.ZERO;
         BigDecimal outstandingAmount = sale.getTotalAmount().subtract(receivedAmount);
 
+        // Get item count from repository
+        int itemCount = saleItemRepository.findBySale(sale).size();
+
         return SalesReportDTO.builder()
                 .saleDate(sale.getSaleDate())
                 .saleNumber(sale.getSaleNumber())
@@ -73,8 +78,8 @@ public class SalesReportService {
                 .receivedAmount(receivedAmount)
                 .outstandingAmount(outstandingAmount)
                 .paymentStatus(sale.getPaymentStatus() != null ? sale.getPaymentStatus().name() : "PENDING")
-                .paymentMethod(sale.getPaymentMethod())
-                .itemCount(sale.getItems() != null ? sale.getItems().size() : 0)
+                .paymentMethod(sale.getPaymentMethod() != null ? sale.getPaymentMethod().name() : null)
+                .itemCount(itemCount)
                 .build();
     }
 }

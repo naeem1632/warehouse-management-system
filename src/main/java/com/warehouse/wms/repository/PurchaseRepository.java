@@ -54,4 +54,17 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Long> {
                                            @Param("date") LocalDate date);
 
     boolean existsByPurchaseNumber(String purchaseNumber);
+
+    @Query("SELECT p FROM Purchase p WHERE " +
+           "(:warehouseId IS NULL OR p.warehouse.id = :warehouseId) AND " +
+           "(:supplierId IS NULL OR p.supplier.id = :supplierId) AND " +
+           "(:status IS NULL OR p.status = :status) AND " +
+           "(:startDate IS NULL OR p.purchaseDate >= :startDate) AND " +
+           "(:endDate IS NULL OR p.purchaseDate <= :endDate) " +
+           "ORDER BY p.purchaseDate DESC")
+    List<Purchase> findWithFilters(@Param("warehouseId") Long warehouseId,
+                                   @Param("supplierId") Long supplierId,
+                                   @Param("status") PurchaseStatus status,
+                                   @Param("startDate") LocalDate startDate,
+                                   @Param("endDate") LocalDate endDate);
 }

@@ -54,7 +54,7 @@ public class PurchaseReportController {
 
             // Get filter options
             model.addAttribute("warehouses", warehouseService.getAllWarehouses());
-            model.addAttribute("suppliers", supplierService.getAllSuppliers());
+            model.addAttribute("suppliers", supplierService.getAllActiveSuppliers());
 
             // Add data to model
             model.addAttribute("purchases", purchases);
@@ -94,7 +94,7 @@ public class PurchaseReportController {
 
             // Get filter options
             model.addAttribute("warehouses", warehouseService.getAllWarehouses());
-            model.addAttribute("suppliers", supplierService.getAllSuppliers());
+            model.addAttribute("suppliers", supplierService.getAllActiveSuppliers());
 
             // Add data to model
             model.addAttribute("summary", summary);

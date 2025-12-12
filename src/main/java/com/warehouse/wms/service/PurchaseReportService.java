@@ -86,7 +86,7 @@ public class PurchaseReportService {
                 .paidAmount(paidAmount)
                 .outstandingAmount(outstandingAmount)
                 .paymentStatus(purchase.getPaymentStatus() != null ? purchase.getPaymentStatus().name() : "PENDING")
-                .paymentMethod(purchase.getPaymentMethod())
+                .paymentMethod(purchase.getPaymentMethod() != null ? purchase.getPaymentMethod().name() : null)
                 .itemCount(purchase.getItems() != null ? purchase.getItems().size() : 0)
                 .build();
     }
