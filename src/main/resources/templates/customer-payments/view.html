@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/main :: main(content=~{::content}, customCss=~{}, customJs=~{})}">
+<body><th:block th:fragment="content">
+<div class="page-header"><div class="row"><div class="col"><h1><i class="bi bi-receipt"></i> Payment Receipt</h1></div>
+<div class="col-auto"><a th:href="@{/customer-payments}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back</a></div></div></div>
+<div class="card mb-3"><div class="card-header"><h5>Receipt Information</h5></div><div class="card-body"><div class="row">
+<div class="col-md-6 mb-3"><h6 class="text-muted">Receipt Number</h6><p class="fw-bold" th:text="${payment.receiptNumber}"></p></div>
+<div class="col-md-6 mb-3"><h6 class="text-muted">Payment Date</h6><p th:text="${#temporals.format(payment.paymentDate, 'dd-MMM-yyyy')}"></p></div>
+<div class="col-md-6 mb-3"><h6 class="text-muted">Customer</h6><p><span th:text="${payment.customerName}"></span> (<span th:text="${payment.customerCode}"></span>)</p></div>
+<div class="col-md-6 mb-3"><h6 class="text-muted">Amount Received</h6><h4 class="text-success" th:text="${#numbers.formatDecimal(payment.amount, 1, 2)}"></h4></div>
+<div class="col-md-6 mb-3"><h6 class="text-muted">Payment Method</h6><p><span class="badge bg-success" th:text="${payment.paymentMethod}"></span></p></div>
+<div class="col-md-6 mb-3"><h6 class="text-muted">Received By</h6><p th:text="${payment.receivedByName}"></p></div>
+</div></div></div>
+<div class="card mb-3" th:if="${payment.paymentMethod == 'BANK'}"><div class="card-header"><h5>Bank Transfer Details</h5></div><div class="card-body"><div class="row">
+<div class="col-md-6 mb-3"><h6 class="text-muted">Bank Name</h6><p th:text="${payment.bankName} ?: 'N/A'"></p></div>
+<div class="col-md-6 mb-3"><h6 class="text-muted">Account Number</h6><p th:text="${payment.accountNumber} ?: 'N/A'"></p></div>
+<div class="col-md-12 mb-3"><h6 class="text-muted">Transaction Reference</h6><p th:text="${payment.transactionReference} ?: 'N/A'"></p></div>
+</div></div></div>
+<div class="card mb-3" th:if="${payment.paymentMethod == 'CHEQUE'}"><div class="card-header"><h5>Cheque Details</h5></div><div class="card-body"><div class="row">
+<div class="col-md-6 mb-3"><h6 class="text-muted">Cheque Number</h6><p th:text="${payment.chequeNumber} ?: 'N/A'"></p></div>
+<div class="col-md-6 mb-3"><h6 class="text-muted">Cheque Date</h6><p th:text="${payment.chequeDate != null ? #temporals.format(payment.chequeDate, 'dd-MMM-yyyy') : 'N/A'}"></p></div>
+<div class="col-md-12 mb-3"><h6 class="text-muted">Bank Name</h6><p th:text="${payment.bankName} ?: 'N/A'"></p></div>
+</div></div></div>
+<div class="card mb-3" th:if="${payment.notes != null and !payment.notes.isEmpty()}"><div class="card-header"><h5>Notes</h5></div><div class="card-body">
+<p th:text="${payment.notes}"></p>
+</div></div>
+</th:block></body></html>

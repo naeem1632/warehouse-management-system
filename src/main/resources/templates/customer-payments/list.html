@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/main :: main(content=~{::content}, customCss=~{}, customJs=~{})}">
+<body><th:block th:fragment="content">
+<div class="page-header"><div class="row"><div class="col"><h1><i class="bi bi-receipt"></i> Customer Payments</h1></div>
+<div class="col-auto"><a th:href="@{/customer-payments/create}" class="btn btn-success"><i class="bi bi-plus-circle"></i> Receive Payment</a></div></div></div>
+<div class="card mb-3"><div class="card-body"><form th:action="@{/customer-payments}" method="get" class="row g-3">
+<div class="col-md-4"><label>Customer</label><select name="customerId" class="form-select"><option value="">All Customers</option>
+<option th:each="customer : ${customers}" th:value="${customer.id}" th:text="${customer.name}" th:selected="${customerId == customer.id}"></option></select></div>
+<div class="col-md-3"><label>Start Date</label><input type="date" name="startDate" class="form-control" th:value="${startDate}"></div>
+<div class="col-md-3"><label>End Date</label><input type="date" name="endDate" class="form-control" th:value="${endDate}"></div>
+<div class="col-md-2"><label>&nbsp;</label><button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel"></i> Filter</button></div></form></div></div>
+<div class="card"><div class="card-header"><h5>Receipt History (<span th:text="${totalItems}">0</span>)</h5></div><div class="card-body p-0"><div class="table-responsive">
+<table class="table table-hover mb-0"><thead class="table-light"><tr><th>Receipt #</th><th>Date</th><th>Customer</th>
+<th>Amount</th><th>Method</th><th>Notes</th><th>Received By</th><th>Actions</th></tr></thead><tbody>
+<tr th:if="${#lists.isEmpty(payments)}"><td colspan="8" class="text-center py-4">No payments found</td></tr>
+<tr th:each="payment : ${payments}"><td><strong th:text="${payment.receiptNumber}"></strong></td>
+<td th:text="${#temporals.format(payment.paymentDate, 'dd-MMM-yyyy')}"></td>
+<td><div th:text="${payment.customerName}"></div><small class="text-muted" th:text="${payment.customerCode}"></small></td>
+<td><strong class="text-success" th:text="${#numbers.formatDecimal(payment.amount, 1, 2)}"></strong></td>
+<td><span class="badge bg-success" th:text="${payment.paymentMethod}"></span></td>
+<td><small th:text="${payment.notes} ?: '-'"></small></td>
+<td><small th:text="${payment.receivedByName}"></small></td>
+<td><a th:href="@{/customer-payments/{id}(id=${payment.id})}" class="btn btn-outline-info btn-sm" title="View"><i class="bi bi-eye"></i></a></td></tr>
+</tbody></table></div></div>
+<div class="card-footer" th:if="${totalPages > 1}"><nav><ul class="pagination justify-content-center mb-0">
+<li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'"><a class="page-link" th:href="@{/customer-payments(page=${currentPage - 1})}">Previous</a></li>
+<li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${i == currentPage} ? 'active'">
+<a class="page-link" th:href="@{/customer-payments(page=${i})}" th:text="${i + 1}"></a></li>
+<li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'"><a class="page-link" th:href="@{/customer-payments(page=${currentPage + 1})}">Next</a></li>
+</ul></nav></div></div>
+</th:block></body></html>

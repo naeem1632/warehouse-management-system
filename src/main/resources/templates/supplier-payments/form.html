@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/main :: main(content=~{::content}, customCss=~{}, customJs=~{::customJs})}">
+<body><th:block th:fragment="content">
+<div class="page-header"><h1><i class="bi bi-cash-coin"></i> New Supplier Payment</h1></div>
+<form th:action="@{/supplier-payments}" method="post" th:object="${payment}">
+<div class="card mb-3"><div class="card-header"><h5>Payment Information</h5></div><div class="card-body"><div class="row">
+<div class="col-md-6 mb-3"><label>Supplier <span class="text-danger">*</span></label><select class="form-select" th:field="*{supplierId}" required>
+<option value="">Select Supplier</option><option th:each="supplier : ${suppliers}" th:value="${supplier.id}" th:text="${supplier.name + ' (' + supplier.code + ')'}"></option></select></div>
+<div class="col-md-3 mb-3"><label>Payment Date <span class="text-danger">*</span></label><input type="date" class="form-control" th:field="*{paymentDate}" required></div>
+<div class="col-md-3 mb-3"><label>Amount <span class="text-danger">*</span></label><input type="number" class="form-control" th:field="*{amount}" step="0.01" placeholder="0.00" required></div>
+<div class="col-md-12 mb-3"><label>Payment Method <span class="text-danger">*</span></label><select class="form-select" th:field="*{paymentMethod}" id="paymentMethod" required>
+<option value="">Select Method</option><option th:each="method : ${paymentMethods}" th:value="${method}" th:text="${method}"></option></select></div>
+</div></div></div>
+<div class="card mb-3" id="bankDetails" style="display:none;"><div class="card-header"><h5>Bank Transfer Details</h5></div><div class="card-body"><div class="row">
+<div class="col-md-6 mb-3"><label>Bank Name</label><input type="text" class="form-control" th:field="*{bankName}"></div>
+<div class="col-md-6 mb-3"><label>Account Number</label><input type="text" class="form-control" th:field="*{accountNumber}"></div>
+<div class="col-md-12 mb-3"><label>Transaction Reference</label><input type="text" class="form-control" th:field="*{transactionReference}" placeholder="e.g., TXN123456"></div>
+</div></div></div>
+<div class="card mb-3" id="chequeDetails" style="display:none;"><div class="card-header"><h5>Cheque Details</h5></div><div class="card-body"><div class="row">
+<div class="col-md-6 mb-3"><label>Cheque Number</label><input type="text" class="form-control" th:field="*{chequeNumber}"></div>
+<div class="col-md-6 mb-3"><label>Cheque Date</label><input type="date" class="form-control" th:field="*{chequeDate}"></div>
+<div class="col-md-12 mb-3"><label>Bank Name</label><input type="text" class="form-control" th:field="*{bankName}"></div>
+</div></div></div>
+<div class="card mb-3"><div class="card-header"><h5>Additional Information</h5></div><div class="card-body">
+<div class="mb-3"><label>Notes</label><textarea class="form-control" th:field="*{notes}" rows="3" placeholder="Additional notes (optional)"></textarea></div>
+</div></div>
+<div class="d-flex justify-content-between"><a th:href="@{/supplier-payments}" class="btn btn-secondary"><i class="bi bi-x-circle"></i> Cancel</a>
+<button type="submit" class="btn btn-success"><i class="bi bi-check-circle"></i> Record Payment</button></div>
+</form></th:block>
+<th:block th:fragment="customJs"><script>
+document.getElementById('paymentMethod').addEventListener('change',function(){
+var m=this.value;var b=document.getElementById('bankDetails');var c=document.getElementById('chequeDetails');
+b.style.display=m==='BANK'?'block':'none';c.style.display=m==='CHEQUE'?'block':'none';});
+</script></th:block></body></html>
