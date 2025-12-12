@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/main :: main(content=~{::content}, customCss=~{}, customJs=~{::customJs})}">
+<body><th:block th:fragment="content">
+<div class="page-header"><h1><i class="bi bi-clipboard-data"></i> Physical Stock Verification</h1></div>
+<div class="alert alert-info"><i class="bi bi-info-circle"></i> <strong>Instructions:</strong> Select warehouse, enter physical counts, and system will automatically create adjustments for discrepancies.</div>
+<form id="verificationForm" th:action="@{/stock/verification/verify}" method="post">
+<div class="card mb-3"><div class="card-header"><h5>Warehouse Selection</h5></div><div class="card-body">
+<div class="row"><div class="col-md-6"><label>Select Warehouse <span class="text-danger">*</span></label>
+<select name="warehouseId" id="warehouseSelect" class="form-select" required>
+<option value="">Select Warehouse</option>
+<option th:each="warehouse : ${warehouses}" th:value="${warehouse.id}" th:text="${warehouse.name}"></option>
+</select></div>
+<div class="col-md-6"><label>&nbsp;</label>
+<button type="button" id="loadProducts" class="btn btn-primary w-100"><i class="bi bi-arrow-down-circle"></i> Load Products</button></div>
+</div></div></div>
+<div id="productsSection" class="card mb-3" style="display:none;">
+<div class="card-header"><h5>Enter Physical Counts</h5></div><div class="card-body p-0">
+<div class="table-responsive"><table class="table table-hover mb-0"><thead class="table-light">
+<tr><th>Product</th><th>SKU</th><th>Unit</th><th class="text-end">System Stock</th><th>Physical Count</th><th class="text-end">Difference</th></tr>
+</thead><tbody id="productsTable"></tbody></table></div></div></div>
+<div id="submitSection" class="d-flex justify-content-between" style="display:none!important;">
+<a th:href="@{/stock/overview}" class="btn btn-secondary"><i class="bi bi-x-circle"></i> Cancel</a>
+<button type="submit" class="btn btn-success"><i class="bi bi-check-circle"></i> Create Adjustments for Discrepancies</button></div>
+</form></th:block>
+<th:block th:fragment="customJs"><script>
+document.getElementById('loadProducts')?.addEventListener('click',function(){
+var wid=document.getElementById('warehouseSelect').value;
+if(!wid){alert('Please select a warehouse');return;}
+this.disabled=true;this.innerHTML='<span class="spinner-border spinner-border-sm"></span> Loading...';
+fetch('/stock/verification/products?warehouseId='+wid)
+.then(r=>r.json()).then(data=>{
+var tbody=document.getElementById('productsTable');tbody.innerHTML='';
+if(data.length===0){tbody.innerHTML='<tr><td colspan="6" class="text-center py-4">No products in stock</td></tr>';
+document.getElementById('productsSection').style.display='block';document.getElementById('loadProducts').disabled=false;
+document.getElementById('loadProducts').innerHTML='<i class="bi bi-arrow-down-circle"></i> Load Products';return;}
+data.forEach(function(item){
+var row='<tr><td><strong>'+item.productName+'</strong></td><td><small class="text-muted">'+item.productSku+'</small></td>'+
+'<td>'+item.productUnit+'</td><td class="text-end"><strong>'+parseFloat(item.currentQuantity).toFixed(2)+'</strong></td>'+
+'<td><input type="number" name="physical_'+item.productId+'" class="form-control physical-count" step="0.001" '+
+'data-system="'+item.currentQuantity+'" data-product-id="'+item.productId+'"></td>'+
+'<td class="text-end difference-cell" id="diff_'+item.productId+'">-</td></tr>';
+tbody.innerHTML+=row;
+});
+document.getElementById('productsSection').style.display='block';
+document.getElementById('submitSection').style.display='flex';
+document.querySelectorAll('.physical-count').forEach(function(input){
+input.addEventListener('input',function(){
+var sys=parseFloat(this.dataset.system)||0;
+var phy=parseFloat(this.value)||0;
+var diff=phy-sys;
+var diffCell=document.getElementById('diff_'+this.dataset.productId);
+diffCell.textContent=diff.toFixed(3);
+if(diff>0){diffCell.className='text-end text-success fw-bold';}
+else if(diff<0){diffCell.className='text-end text-danger fw-bold';}
+else{diffCell.className='text-end text-muted';}
+});
+});
+document.getElementById('loadProducts').disabled=false;
+document.getElementById('loadProducts').innerHTML='<i class="bi bi-arrow-down-circle"></i> Reload Products';
+}).catch(e=>{alert('Error loading products: '+e);
+document.getElementById('loadProducts').disabled=false;
+document.getElementById('loadProducts').innerHTML='<i class="bi bi-arrow-down-circle"></i> Load Products';});
+});
+</script></th:block></body></html>
