@@ -50,4 +50,7 @@
     <!-- Payment tracking: supplier_payments and customer_payments tables -->
     <include file="db/changelog/changes/015-create-supplier-payments-and-customer-payments.xml"/>
 
+    <!-- Stock adjustments: stock_adjustments table -->
+    <include file="db/changelog/changes/016-create-stock-adjustments.xml"/>
+
 </databaseChangeLog>
