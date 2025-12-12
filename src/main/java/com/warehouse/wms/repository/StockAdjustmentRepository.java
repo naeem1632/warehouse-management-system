@@ -31,8 +31,8 @@ public interface StockAdjustmentRepository extends JpaRepository<StockAdjustment
            "(:warehouseId IS NULL OR sa.warehouse.id = :warehouseId) AND " +
            "(:productId IS NULL OR sa.product.id = :productId) AND " +
            "(:status IS NULL OR sa.status = :status) AND " +
-           "(:startDate IS NULL OR sa.adjustmentDate >= :startDate) AND " +
-           "(:endDate IS NULL OR sa.adjustmentDate <= :endDate) " +
+           "(CAST(:startDate AS date) IS NULL OR sa.adjustmentDate >= :startDate) AND " +
+           "(CAST(:endDate AS date) IS NULL OR sa.adjustmentDate <= :endDate) " +
            "ORDER BY sa.adjustmentDate DESC")
     Page<StockAdjustment> findWithFilters(
         @Param("warehouseId") Long warehouseId,

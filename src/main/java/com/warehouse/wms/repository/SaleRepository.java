@@ -40,8 +40,8 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
     @Query("SELECT s FROM Sale s WHERE " +
            "(:warehouseId IS NULL OR s.warehouse.id = :warehouseId) AND " +
            "(:customerId IS NULL OR s.customer.id = :customerId) AND " +
-           "(:startDate IS NULL OR s.saleDate >= :startDate) AND " +
-           "(:endDate IS NULL OR s.saleDate <= :endDate) " +
+           "(CAST(:startDate AS date) IS NULL OR s.saleDate >= :startDate) AND " +
+           "(CAST(:endDate AS date) IS NULL OR s.saleDate <= :endDate) " +
            "ORDER BY s.saleDate DESC")
     List<Sale> findWithFilters(@Param("warehouseId") Long warehouseId,
                                @Param("customerId") Long customerId,

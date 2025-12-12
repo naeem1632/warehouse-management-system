@@ -47,8 +47,8 @@ public interface StockMovementRepository extends JpaRepository<StockMovement, Lo
            "(:warehouseId IS NULL OR sm.warehouse.id = :warehouseId) AND " +
            "(:productId IS NULL OR sm.product.id = :productId) AND " +
            "(:movementType IS NULL OR sm.movementType = :movementType) AND " +
-           "(:startDate IS NULL OR sm.createdAt >= :startDate) AND " +
-           "(:endDate IS NULL OR sm.createdAt <= :endDate) " +
+           "(CAST(:startDate AS timestamp) IS NULL OR sm.createdAt >= :startDate) AND " +
+           "(CAST(:endDate AS timestamp) IS NULL OR sm.createdAt <= :endDate) " +
            "ORDER BY sm.createdAt DESC")
     Page<StockMovement> findWithFilters(@Param("warehouseId") Long warehouseId,
                                        @Param("productId") Long productId,
@@ -60,8 +60,8 @@ public interface StockMovementRepository extends JpaRepository<StockMovement, Lo
     @Query("SELECT sm FROM StockMovement sm WHERE " +
            "sm.warehouse.id = :warehouseId AND " +
            "sm.product.id = :productId AND " +
-           "(:startDate IS NULL OR sm.createdAt >= :startDate) AND " +
-           "(:endDate IS NULL OR sm.createdAt <= :endDate) " +
+           "(CAST(:startDate AS timestamp) IS NULL OR sm.createdAt >= :startDate) AND " +
+           "(CAST(:endDate AS timestamp) IS NULL OR sm.createdAt <= :endDate) " +
            "ORDER BY sm.createdAt DESC")
     List<StockMovement> findByWarehouseAndProductWithDateFilter(
         @Param("warehouseId") Long warehouseId,
