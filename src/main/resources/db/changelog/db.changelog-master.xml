@@ -41,4 +41,10 @@
     <!-- Stock movements: rename balance columns to quantity for clarity -->
     <include file="db/changelog/changes/012-rename-stock-movement-columns.xml"/>
 
+    <!-- Customer management: customers and customer_ledger tables -->
+    <include file="db/changelog/changes/013-create-customers-and-customer-ledger.xml"/>
+
+    <!-- Sales management: sales and sale_items tables -->
+    <include file="db/changelog/changes/014-create-sales-and-sale-items.xml"/>
+
 </databaseChangeLog>

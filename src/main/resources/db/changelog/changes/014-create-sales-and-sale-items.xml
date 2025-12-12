@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="014-create-sales-table" author="system">
+        <comment>Create sales table for sales management</comment>
+        <createTable tableName="sales">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="sale_number" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="invoice_number" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="sale_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="customer_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_sales_customer"
+                             references="customers(id)"/>
+            </column>
+            <column name="warehouse_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_sales_warehouse"
+                             references="warehouses(id)"/>
+            </column>
+            <column name="subtotal" type="DECIMAL(15,2)"/>
+            <column name="discount" type="DECIMAL(15,2)" defaultValue="0"/>
+            <column name="total_amount" type="DECIMAL(15,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="received_amount" type="DECIMAL(15,2)" defaultValue="0"/>
+            <column name="payment_status" type="VARCHAR(20)" defaultValue="PENDING"/>
+            <column name="payment_method" type="VARCHAR(20)"/>
+            <column name="notes" type="TEXT"/>
+            <column name="status" type="VARCHAR(20)" defaultValue="COMPLETED"/>
+            <column name="created_by" type="BIGINT">
+                <constraints foreignKeyName="fk_sales_user"
+                             references="users(id)"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+
+        <createIndex indexName="idx_sales_number" tableName="sales">
+            <column name="sale_number"/>
+        </createIndex>
+        <createIndex indexName="idx_sales_invoice" tableName="sales">
+            <column name="invoice_number"/>
+        </createIndex>
+        <createIndex indexName="idx_sales_customer" tableName="sales">
+            <column name="customer_id"/>
+        </createIndex>
+        <createIndex indexName="idx_sales_warehouse" tableName="sales">
+            <column name="warehouse_id"/>
+        </createIndex>
+        <createIndex indexName="idx_sales_date" tableName="sales">
+            <column name="sale_date"/>
+        </createIndex>
+        <createIndex indexName="idx_sales_status" tableName="sales">
+            <column name="status"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="014-create-sale-items-table" author="system">
+        <comment>Create sale_items table for individual sale line items</comment>
+        <createTable tableName="sale_items">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="sale_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_sale_items_sale"
+                             references="sales(id)" deleteCascade="true"/>
+            </column>
+            <column name="product_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_sale_items_product"
+                             references="products(id)"/>
+            </column>
+            <column name="quantity" type="DECIMAL(15,3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rate" type="DECIMAL(15,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="discount_percent" type="DECIMAL(5,2)" defaultValue="0"/>
+            <column name="discount_amount" type="DECIMAL(15,2)" defaultValue="0"/>
+            <column name="amount" type="DECIMAL(15,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+
+        <createIndex indexName="idx_sale_items_sale" tableName="sale_items">
+            <column name="sale_id"/>
+        </createIndex>
+        <createIndex indexName="idx_sale_items_product" tableName="sale_items">
+            <column name="product_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
