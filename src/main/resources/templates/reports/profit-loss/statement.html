@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/main :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Profit & Loss Statement</title>
+    <style>
+        .pl-section {
+            margin-bottom: 20px;
+        }
+        .pl-header {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            padding: 10px;
+            border-bottom: 2px solid #dee2e6;
+        }
+        .pl-item {
+            padding: 8px 10px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .pl-subtotal {
+            font-weight: bold;
+            background-color: #e9ecef;
+            padding: 10px;
+            border-bottom: 2px solid #dee2e6;
+        }
+        .pl-total {
+            font-weight: bold;
+            font-size: 1.1rem;
+            background-color: #d1e7dd;
+            padding: 12px 10px;
+            border-top: 3px solid #198754;
+            border-bottom: 3px solid #198754;
+        }
+        .amount {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+<div th:fragment="content">
+    <div class="container-fluid mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-calculator"></i> Profit & Loss Statement</h2>
+            <div>
+                <a th:href="@{/reports/profit-loss/comparative}" class="btn btn-outline-primary">
+                    <i class="bi bi-bar-chart"></i> Comparative View
+                </a>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form th:action="@{/reports/profit-loss}" method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Warehouse</label>
+                        <select name="warehouseId" class="form-select">
+                            <option value="">All Warehouses</option>
+                            <option th:each="warehouse : ${warehouses}"
+                                    th:value="${warehouse.id}"
+                                    th:text="${warehouse.name}"
+                                    th:selected="${warehouse.id == selectedWarehouseId}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" name="startDate" class="form-control"
+                               th:value="${startDate}" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">End Date</label>
+                        <input type="date" name="endDate" class="form-control"
+                               th:value="${endDate}" required>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i> Generate
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div th:if="${error}" class="alert alert-danger" role="alert">
+            <i class="bi bi-exclamation-triangle"></i> <span th:text="${error}"></span>
+        </div>
+
+        <!-- P&L Statement -->
+        <div th:if="${statement}" class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Profit & Loss Statement</h5>
+                <small th:text="'Warehouse: ' + ${statement.warehouseName}"></small><br>
+                <small th:text="'Period: ' + ${#temporals.format(statement.startDate, 'dd-MMM-yyyy')} + ' to ' + ${#temporals.format(statement.endDate, 'dd-MMM-yyyy')}"></small>
+            </div>
+            <div class="card-body">
+                <!-- Revenue Section -->
+                <div class="pl-section">
+                    <div class="pl-header row">
+                        <div class="col-8">REVENUE</div>
+                        <div class="col-4 amount"></div>
+                    </div>
+                    <div class="pl-item row">
+                        <div class="col-8 ps-4">Gross Sales</div>
+                        <div class="col-4 amount" th:text="${#numbers.formatDecimal(statement.grossSales, 1, 2)}"></div>
+                    </div>
+                    <div class="pl-item row">
+                        <div class="col-8 ps-4 text-danger">Less: Sales Returns</div>
+                        <div class="col-4 amount text-danger" th:text="'(' + ${#numbers.formatDecimal(statement.salesReturns, 1, 2)} + ')'"></div>
+                    </div>
+                    <div class="pl-item row">
+                        <div class="col-8 ps-4 text-danger">Less: Sales Discounts</div>
+                        <div class="col-4 amount text-danger" th:text="'(' + ${#numbers.formatDecimal(statement.salesDiscounts, 1, 2)} + ')'"></div>
+                    </div>
+                    <div class="pl-subtotal row">
+                        <div class="col-8">Net Sales</div>
+                        <div class="col-4 amount text-primary" th:text="${#numbers.formatDecimal(statement.netSales, 1, 2)}"></div>
+                    </div>
+                </div>
+
+                <!-- Cost of Goods Sold Section -->
+                <div class="pl-section">
+                    <div class="pl-header row">
+                        <div class="col-8">COST OF GOODS SOLD</div>
+                        <div class="col-4 amount"></div>
+                    </div>
+                    <div class="pl-item row">
+                        <div class="col-8 ps-4">Opening Stock</div>
+                        <div class="col-4 amount" th:text="${#numbers.formatDecimal(statement.openingStock, 1, 2)}"></div>
+                    </div>
+                    <div class="pl-item row">
+                        <div class="col-8 ps-4">Add: Purchases</div>
+                        <div class="col-4 amount" th:text="${#numbers.formatDecimal(statement.purchases, 1, 2)}"></div>
+                    </div>
+                    <div class="pl-item row">
+                        <div class="col-8 ps-4 text-danger">Less: Purchase Returns</div>
+                        <div class="col-4 amount text-danger" th:text="'(' + ${#numbers.formatDecimal(statement.purchaseReturns, 1, 2)} + ')'"></div>
+                    </div>
+                    <div class="pl-item row">
+                        <div class="col-8 ps-5 fst-italic">Net Purchases</div>
+                        <div class="col-4 amount" th:text="${#numbers.formatDecimal(statement.netPurchases, 1, 2)}"></div>
+                    </div>
+                    <div class="pl-item row">
+                        <div class="col-8 ps-4 text-danger">Less: Closing Stock</div>
+                        <div class="col-4 amount text-danger" th:text="'(' + ${#numbers.formatDecimal(statement.closingStock, 1, 2)} + ')'"></div>
+                    </div>
+                    <div class="pl-subtotal row">
+                        <div class="col-8">Cost of Goods Sold</div>
+                        <div class="col-4 amount text-warning" th:text="${#numbers.formatDecimal(statement.costOfGoodsSold, 1, 2)}"></div>
+                    </div>
+                </div>
+
+                <!-- Gross Profit -->
+                <div class="pl-section">
+                    <div class="pl-total row"
+                         th:classappend="${statement.grossProfit.compareTo(T(java.math.BigDecimal).ZERO) >= 0} ? 'bg-success-subtle' : 'bg-danger-subtle'">
+                        <div class="col-8">GROSS PROFIT</div>
+                        <div class="col-4 amount"
+                             th:classappend="${statement.grossProfit.compareTo(T(java.math.BigDecimal).ZERO) >= 0} ? 'text-success' : 'text-danger'"
+                             th:text="${#numbers.formatDecimal(statement.grossProfit, 1, 2)}"></div>
+                    </div>
+                    <div class="pl-item row">
+                        <div class="col-8 ps-4 fst-italic">Gross Profit Margin</div>
+                        <div class="col-4 amount fst-italic"
+                             th:classappend="${statement.grossProfitMargin.compareTo(T(java.math.BigDecimal).ZERO) >= 0} ? 'text-success' : 'text-danger'"
+                             th:text="${#numbers.formatDecimal(statement.grossProfitMargin, 1, 2)} + '%'"></div>
+                    </div>
+                </div>
+
+                <!-- Operating Expenses -->
+                <div class="pl-section">
+                    <div class="pl-header row">
+                        <div class="col-8">OPERATING EXPENSES</div>
+                        <div class="col-4 amount"></div>
+                    </div>
+                    <div class="pl-item row">
+                        <div class="col-8 ps-4 text-muted fst-italic">Operating Expenses (Not tracked yet)</div>
+                        <div class="col-4 amount text-muted" th:text="${#numbers.formatDecimal(statement.operatingExpenses, 1, 2)}"></div>
+                    </div>
+                </div>
+
+                <!-- Net Profit -->
+                <div class="pl-section">
+                    <div class="pl-total row"
+                         th:classappend="${statement.netProfit.compareTo(T(java.math.BigDecimal).ZERO) >= 0} ? 'bg-success' : 'bg-danger'"
+                         style="color: white;">
+                        <div class="col-8">NET PROFIT</div>
+                        <div class="col-4 amount" th:text="${#numbers.formatDecimal(statement.netProfit, 1, 2)}"></div>
+                    </div>
+                    <div class="pl-item row">
+                        <div class="col-8 ps-4 fst-italic">Net Profit Margin</div>
+                        <div class="col-4 amount fst-italic fw-bold"
+                             th:classappend="${statement.netProfitMargin.compareTo(T(java.math.BigDecimal).ZERO) >= 0} ? 'text-success' : 'text-danger'"
+                             th:text="${#numbers.formatDecimal(statement.netProfitMargin, 1, 2)} + '%'"></div>
+                    </div>
+                </div>
+
+                <!-- Additional Metrics -->
+                <div class="mt-4 pt-4 border-top">
+                    <h6>Additional Metrics</h6>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-between">
+                                <span>Total Sales Count:</span>
+                                <strong th:text="${statement.totalSalesCount}"></strong>
+                            </div>
+                            <div class="d-flex justify-content-between mt-2">
+                                <span>Average Sale Value:</span>
+                                <strong th:text="'₨ ' + ${#numbers.formatDecimal(statement.averageSaleValue, 1, 2)}"></strong>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-between">
+                                <span>Total Purchases Count:</span>
+                                <strong th:text="${statement.totalPurchasesCount}"></strong>
+                            </div>
+                            <div class="d-flex justify-content-between mt-2">
+                                <span>Average Purchase Value:</span>
+                                <strong th:text="'₨ ' + ${#numbers.formatDecimal(statement.averagePurchaseValue, 1, 2)}"></strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

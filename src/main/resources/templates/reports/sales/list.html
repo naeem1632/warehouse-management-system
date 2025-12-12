@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/main :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Sales Report</title>
+</head>
+<body>
+<div th:fragment="content">
+    <div class="container-fluid mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-graph-up"></i> Sales Report</h2>
+            <div>
+                <a th:href="@{/reports/sales/summary}" class="btn btn-outline-primary">
+                    <i class="bi bi-clipboard-data"></i> View Summary
+                </a>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form th:action="@{/reports/sales}" method="get" class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Warehouse</label>
+                        <select name="warehouseId" class="form-select">
+                            <option value="">All Warehouses</option>
+                            <option th:each="warehouse : ${warehouses}"
+                                    th:value="${warehouse.id}"
+                                    th:text="${warehouse.name}"
+                                    th:selected="${warehouse.id == selectedWarehouseId}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Customer</label>
+                        <select name="customerId" class="form-select">
+                            <option value="">All Customers</option>
+                            <option th:each="customer : ${customers}"
+                                    th:value="${customer.id}"
+                                    th:text="${customer.name}"
+                                    th:selected="${customer.id == selectedCustomerId}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" name="startDate" class="form-control"
+                               th:value="${startDate}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">End Date</label>
+                        <input type="date" name="endDate" class="form-control"
+                               th:value="${endDate}">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i> Filter
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="row mb-4" th:if="${summary}">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2">Total Sales</h6>
+                        <h3 class="card-title" th:text="${summary.totalCount}">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2">Total Amount</h6>
+                        <h3 class="card-title" th:text="${#numbers.formatDecimal(summary.totalAmount, 1, 2)}">0.00</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2">Received Amount</h6>
+                        <h3 class="card-title" th:text="${#numbers.formatDecimal(summary.paidAmount, 1, 2)}">0.00</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2">Outstanding</h6>
+                        <h3 class="card-title" th:text="${#numbers.formatDecimal(summary.outstandingAmount, 1, 2)}">0.00</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div th:if="${error}" class="alert alert-danger" role="alert">
+            <i class="bi bi-exclamation-triangle"></i> <span th:text="${error}"></span>
+        </div>
+
+        <!-- Sales Report Table -->
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Sale#</th>
+                                <th>Invoice#</th>
+                                <th>Customer</th>
+                                <th>Warehouse</th>
+                                <th class="text-end">Items</th>
+                                <th class="text-end">Subtotal</th>
+                                <th class="text-end">Discount</th>
+                                <th class="text-end">Total</th>
+                                <th class="text-end">Received</th>
+                                <th class="text-end">Outstanding</th>
+                                <th>Status</th>
+                                <th>Method</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(sales)}">
+                                <td colspan="13" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                                    <p class="mb-0 mt-2">No sales found for the selected filters.</p>
+                                </td>
+                            </tr>
+                            <tr th:each="sale : ${sales}">
+                                <td th:text="${#temporals.format(sale.saleDate, 'dd-MMM-yyyy')}"></td>
+                                <td><strong th:text="${sale.saleNumber}"></strong></td>
+                                <td th:text="${sale.invoiceNumber}"></td>
+                                <td>
+                                    <div th:text="${sale.customerName}"></div>
+                                    <small class="text-muted" th:text="${sale.customerCode}"></small>
+                                </td>
+                                <td th:text="${sale.warehouseName}"></td>
+                                <td class="text-end" th:text="${sale.itemCount}"></td>
+                                <td class="text-end" th:text="${#numbers.formatDecimal(sale.subtotal, 1, 2)}"></td>
+                                <td class="text-end text-danger" th:text="${#numbers.formatDecimal(sale.discount, 1, 2)}"></td>
+                                <td class="text-end"><strong th:text="${#numbers.formatDecimal(sale.totalAmount, 1, 2)}"></strong></td>
+                                <td class="text-end text-success" th:text="${#numbers.formatDecimal(sale.receivedAmount, 1, 2)}"></td>
+                                <td class="text-end text-warning" th:text="${#numbers.formatDecimal(sale.outstandingAmount, 1, 2)}"></td>
+                                <td>
+                                    <span th:if="${sale.paymentStatus == 'PAID'}" class="badge bg-success">Paid</span>
+                                    <span th:if="${sale.paymentStatus == 'PARTIAL'}" class="badge bg-warning">Partial</span>
+                                    <span th:if="${sale.paymentStatus == 'PENDING'}" class="badge bg-danger">Pending</span>
+                                </td>
+                                <td th:text="${sale.paymentMethod}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

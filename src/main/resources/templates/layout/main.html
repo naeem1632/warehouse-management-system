@@ -97,6 +97,18 @@
                             <li><a class="dropdown-item" th:href="@{/customer-payments/create}">Receive Payment</a></li>
                         </ul>
                     </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" th:classappend="${#strings.equals(activePage, 'reports')} ? 'active' : ''">
+                            <i class="bi bi-file-earmark-bar-graph"></i> Reports
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" th:href="@{/reports/purchases}">Purchase Report</a></li>
+                            <li><a class="dropdown-item" th:href="@{/reports/sales}">Sales Report</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" th:href="@{/reports/profit-loss}">Profit & Loss</a></li>
+                            <li><a class="dropdown-item" th:href="@{/reports/stock-valuation}">Stock Valuation</a></li>
+                        </ul>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" th:href="@{/customers}" th:classappend="${#strings.equals(activePage, 'customers')} ? 'active' : ''">
                             <i class="bi bi-people"></i> Customers

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/main :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Sales Summary</title>
+</head>
+<body>
+<div th:fragment="content">
+    <div class="container-fluid mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-clipboard-data"></i> Sales Summary</h2>
+            <div>
+                <a th:href="@{/reports/sales}" class="btn btn-outline-primary">
+                    <i class="bi bi-list-ul"></i> View Details
+                </a>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form th:action="@{/reports/sales/summary}" method="get" class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Warehouse</label>
+                        <select name="warehouseId" class="form-select">
+                            <option value="">All Warehouses</option>
+                            <option th:each="warehouse : ${warehouses}"
+                                    th:value="${warehouse.id}"
+                                    th:text="${warehouse.name}"
+                                    th:selected="${warehouse.id == selectedWarehouseId}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Customer</label>
+                        <select name="customerId" class="form-select">
+                            <option value="">All Customers</option>
+                            <option th:each="customer : ${customers}"
+                                    th:value="${customer.id}"
+                                    th:text="${customer.name}"
+                                    th:selected="${customer.id == selectedCustomerId}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" name="startDate" class="form-control"
+                               th:value="${startDate}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">End Date</label>
+                        <input type="date" name="endDate" class="form-control"
+                               th:value="${endDate}">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i> Filter
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div th:if="${error}" class="alert alert-danger" role="alert">
+            <i class="bi bi-exclamation-triangle"></i> <span th:text="${error}"></span>
+        </div>
+
+        <!-- Summary Display -->
+        <div th:if="${summary}" class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">Sales Summary</h5>
+                        <small th:text="'Period: ' + ${#temporals.format(startDate, 'dd-MMM-yyyy')} + ' to ' + ${#temporals.format(endDate, 'dd-MMM-yyyy')}"></small>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-3 border-end">
+                                <h6 class="text-muted">Total Sales</h6>
+                                <h2 class="text-primary" th:text="${summary.totalCount}">0</h2>
+                            </div>
+                            <div class="col-md-3 border-end">
+                                <h6 class="text-muted">Total Amount</h6>
+                                <h2 class="text-info" th:text="'₨ ' + ${#numbers.formatDecimal(summary.totalAmount, 1, 2)}">₨ 0.00</h2>
+                            </div>
+                            <div class="col-md-3 border-end">
+                                <h6 class="text-muted">Received Amount</h6>
+                                <h2 class="text-success" th:text="'₨ ' + ${#numbers.formatDecimal(summary.paidAmount, 1, 2)}">₨ 0.00</h2>
+                            </div>
+                            <div class="col-md-3">
+                                <h6 class="text-muted">Outstanding Amount</h6>
+                                <h2 class="text-warning" th:text="'₨ ' + ${#numbers.formatDecimal(summary.outstandingAmount, 1, 2)}">₨ 0.00</h2>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <h6 class="text-muted">Payment Status</h6>
+                                <div class="progress" style="height: 30px;">
+                                    <div class="progress-bar bg-success"
+                                         role="progressbar"
+                                         th:style="'width: ' + ${summary.totalAmount.compareTo(T(java.math.BigDecimal).ZERO) > 0 ? summary.paidAmount.divide(summary.totalAmount, 4, T(java.math.RoundingMode).HALF_UP).multiply(T(java.math.BigDecimal).valueOf(100)).intValue() : 0} + '%'"
+                                         th:text="'Received: ₨ ' + ${#numbers.formatDecimal(summary.paidAmount, 1, 2)}">
+                                    </div>
+                                    <div class="progress-bar bg-warning"
+                                         role="progressbar"
+                                         th:style="'width: ' + ${summary.totalAmount.compareTo(T(java.math.BigDecimal).ZERO) > 0 ? summary.outstandingAmount.divide(summary.totalAmount, 4, T(java.math.RoundingMode).HALF_UP).multiply(T(java.math.BigDecimal).valueOf(100)).intValue() : 0} + '%'"
+                                         th:text="'Outstanding: ₨ ' + ${#numbers.formatDecimal(summary.outstandingAmount, 1, 2)}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
