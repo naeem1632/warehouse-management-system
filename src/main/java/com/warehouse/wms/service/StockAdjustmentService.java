@@ -204,7 +204,7 @@ public class StockAdjustmentService {
                 .productId(adjustment.getProduct().getId())
                 .productName(adjustment.getProduct().getName())
                 .productSku(adjustment.getProduct().getSku())
-                .productUnit(adjustment.getProduct().getUnit())
+                .productUnit(adjustment.getProduct().getUnit().getDisplayName())
                 .adjustmentType(adjustment.getAdjustmentType())
                 .quantityBefore(adjustment.getQuantityBefore())
                 .adjustmentQuantity(adjustment.getAdjustmentQuantity())

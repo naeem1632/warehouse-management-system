@@ -3,7 +3,7 @@ package com.warehouse.wms.controller;
 import com.warehouse.wms.dto.ProductDTO;
 import com.warehouse.wms.dto.StockAdjustmentDTO;
 import com.warehouse.wms.dto.StockCurrentDTO;
-import com.warehouse.wms.dto.WarehouseDTO;
+import com.warehouse.wms.entity.Warehouse;
 import com.warehouse.wms.enums.AdjustmentType;
 import com.warehouse.wms.service.ProductService;
 import com.warehouse.wms.service.StockAdjustmentService;
@@ -36,9 +36,9 @@ public class StockVerificationController {
 
     @GetMapping
     public String showVerificationForm(Model model) {
-        List<WarehouseDTO> warehouses = SecurityUtils.isAdmin()
+        List<Warehouse> warehouses = SecurityUtils.isAdmin()
             ? warehouseService.getAllWarehouses()
-            : warehouseService.getWarehousesByCurrentUser();
+            : List.copyOf(SecurityUtils.getCurrentUserWarehouses());
 
         model.addAttribute("warehouses", warehouses);
         model.addAttribute("activePage", "stock");

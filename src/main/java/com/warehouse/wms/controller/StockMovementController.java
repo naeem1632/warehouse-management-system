@@ -2,7 +2,7 @@ package com.warehouse.wms.controller;
 
 import com.warehouse.wms.dto.ProductDTO;
 import com.warehouse.wms.dto.StockMovementDTO;
-import com.warehouse.wms.dto.WarehouseDTO;
+import com.warehouse.wms.entity.Warehouse;
 import com.warehouse.wms.enums.MovementType;
 import com.warehouse.wms.service.ProductService;
 import com.warehouse.wms.service.StockService;
@@ -46,9 +46,9 @@ public class StockMovementController {
         Page<StockMovementDTO> movementsPage = stockService.getMovementsWithFilters(
                 warehouseId, productId, movementType, startDate, endDate, pageable);
 
-        List<WarehouseDTO> warehouses = SecurityUtils.isAdmin()
+        List<Warehouse> warehouses = SecurityUtils.isAdmin()
             ? warehouseService.getAllWarehouses()
-            : warehouseService.getWarehousesByCurrentUser();
+            : List.copyOf(SecurityUtils.getCurrentUserWarehouses());
 
         List<ProductDTO> products = productService.getAllProducts();
 
@@ -82,7 +82,7 @@ public class StockMovementController {
         List<StockMovementDTO> movements = stockService.getMovementsByWarehouseAndProduct(
                 warehouseId, productId, startDate, endDate);
 
-        WarehouseDTO warehouse = warehouseService.getWarehouseById(warehouseId);
+        Warehouse warehouse = warehouseService.getWarehouseById(warehouseId);
         ProductDTO product = productService.getProductById(productId);
 
         model.addAttribute("movements", movements);

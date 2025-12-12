@@ -2,7 +2,7 @@ package com.warehouse.wms.controller;
 
 import com.warehouse.wms.dto.ProductDTO;
 import com.warehouse.wms.dto.StockAdjustmentDTO;
-import com.warehouse.wms.dto.WarehouseDTO;
+import com.warehouse.wms.entity.Warehouse;
 import com.warehouse.wms.enums.AdjustmentStatus;
 import com.warehouse.wms.enums.AdjustmentType;
 import com.warehouse.wms.service.ProductService;
@@ -48,7 +48,7 @@ public class StockAdjustmentController {
         Page<StockAdjustmentDTO> adjustmentsPage = adjustmentService.getAdjustmentsWithFilters(
                 warehouseId, productId, status, startDate, endDate, pageable);
 
-        List<WarehouseDTO> warehouses = warehouseService.getAllWarehouses();
+        List<Warehouse> warehouses = warehouseService.getAllWarehouses();
         List<ProductDTO> products = productService.getAllProducts();
 
         model.addAttribute("adjustments", adjustmentsPage.getContent());
@@ -72,9 +72,9 @@ public class StockAdjustmentController {
 
     @GetMapping("/create")
     public String showCreateForm(Model model) {
-        List<WarehouseDTO> warehouses = SecurityUtils.isAdmin()
+        List<Warehouse> warehouses = SecurityUtils.isAdmin()
             ? warehouseService.getAllWarehouses()
-            : warehouseService.getWarehousesByCurrentUser();
+            : List.copyOf(SecurityUtils.getCurrentUserWarehouses());
 
         List<ProductDTO> products = productService.getAllProducts();
 

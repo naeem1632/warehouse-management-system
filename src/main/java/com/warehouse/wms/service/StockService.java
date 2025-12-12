@@ -6,11 +6,15 @@ import com.warehouse.wms.entity.*;
 import com.warehouse.wms.enums.MovementType;
 import com.warehouse.wms.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -149,5 +153,35 @@ public class StockService {
             .currentQuantity(current.getCurrentQuantity())
             .lastUpdated(current.getLastUpdated())
             .build();
+    }
+
+    public Page<StockMovementDTO> getMovementsWithFilters(Long warehouseId, Long productId,
+                                                          MovementType movementType,
+                                                          LocalDate startDate, LocalDate endDate,
+                                                          Pageable pageable) {
+        LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : null;
+        LocalDateTime endDateTime = endDate != null ? endDate.atTime(LocalTime.MAX) : null;
+
+        Page<StockMovement> movements = movementRepository.findWithFilters(
+                warehouseId, productId, movementType, startDateTime, endDateTime, pageable);
+
+        return movements.map(this::convertMovementToDTO);
+    }
+
+    public List<StockMovementDTO> getMovementsByWarehouseAndProduct(Long warehouseId, Long productId,
+                                                                     LocalDate startDate, LocalDate endDate) {
+        LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : null;
+        LocalDateTime endDateTime = endDate != null ? endDate.atTime(LocalTime.MAX) : null;
+
+        List<StockMovement> movements = movementRepository.findByWarehouseAndProductWithDateFilter(
+                warehouseId, productId, startDateTime, endDateTime);
+
+        return movements.stream()
+                .map(this::convertMovementToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<StockCurrentDTO> getStockByWarehouse(Long warehouseId) {
+        return getCurrentStockByWarehouse(warehouseId);
     }
 }
