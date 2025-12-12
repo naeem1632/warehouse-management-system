@@ -44,13 +44,13 @@ public class StockService {
                 .currentQuantity(BigDecimal.ZERO)
                 .build());
 
-        BigDecimal balanceBefore = currentStock.getCurrentQuantity();
-        BigDecimal balanceAfter = balanceBefore.add(dto.getQuantity());
+        BigDecimal quantityBefore = currentStock.getCurrentQuantity();
+        BigDecimal quantityAfter = quantityBefore.add(dto.getQuantity());
 
         // Validate stock (cannot go negative unless it's an adjustment)
-        if (balanceAfter.compareTo(BigDecimal.ZERO) < 0 &&
+        if (quantityAfter.compareTo(BigDecimal.ZERO) < 0 &&
             dto.getMovementType() != MovementType.ADJUSTMENT) {
-            throw new RuntimeException("Insufficient stock. Available: " + balanceBefore +
+            throw new RuntimeException("Insufficient stock. Available: " + quantityBefore +
                 ", Required: " + dto.getQuantity().abs());
         }
 
@@ -63,8 +63,8 @@ public class StockService {
             .rate(dto.getRate())
             .referenceType(dto.getReferenceType())
             .referenceId(dto.getReferenceId())
-            .balanceBefore(balanceBefore)
-            .balanceAfter(balanceAfter)
+            .quantityBefore(quantityBefore)
+            .quantityAfter(quantityAfter)
             .notes(dto.getNotes())
             .createdBy(currentUserId)
             .createdAt(LocalDateTime.now())
@@ -73,7 +73,7 @@ public class StockService {
         StockMovement savedMovement = movementRepository.save(movement);
 
         // Update current stock
-        currentStock.setCurrentQuantity(balanceAfter);
+        currentStock.setCurrentQuantity(quantityAfter);
         currentStock.setLastMovement(savedMovement);
         currentStock.setLastUpdated(LocalDateTime.now());
         currentRepository.save(currentStock);
@@ -127,8 +127,8 @@ public class StockService {
             .rate(movement.getRate())
             .referenceType(movement.getReferenceType())
             .referenceId(movement.getReferenceId())
-            .balanceBefore(movement.getBalanceBefore())
-            .balanceAfter(movement.getBalanceAfter())
+            .quantityBefore(movement.getQuantityBefore())
+            .quantityAfter(movement.getQuantityAfter())
             .notes(movement.getNotes())
             .createdBy(movement.getCreatedBy())
             .createdAt(movement.getCreatedAt())

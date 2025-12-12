@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/main :: main(content=~{::content}, customCss=~{}, customJs=~{::customJs})}">
+<body>
+    <th:block th:fragment="content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h1><i class="bi bi-clock-history"></i> Stock Movement History</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a th:href="@{/stock/overview}">Stock Overview</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Movement History</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div class="col-auto">
+                    <a th:href="@{/stock/overview(warehouseId=${warehouse.id})}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to Stock
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product and Warehouse Info -->
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-1">Product</h6>
+                        <p class="mb-0">
+                            <strong th:text="${product.name}"></strong>
+                            <span class="text-muted ms-2" th:text="'SKU: ' + ${product.sku}"></span>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-1">Warehouse</h6>
+                        <p class="mb-0" th:text="${warehouse.name}"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Movements Table -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Movement History (<span th:text="${#lists.size(movements)}">0</span> records)</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date & Time</th>
+                                <th>Movement Type</th>
+                                <th class="text-end">Quantity</th>
+                                <th class="text-end">Rate</th>
+                                <th class="text-end">Quantity Before</th>
+                                <th class="text-end">Quantity After</th>
+                                <th>Reference</th>
+                                <th>Created By</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(movements)}">
+                                <td colspan="9" class="text-center py-4 text-muted">
+                                    <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                                    <p class="mb-0 mt-2">No movement history found for this product</p>
+                                </td>
+                            </tr>
+                            <tr th:each="movement : ${movements}">
+                                <td th:text="${#temporals.format(movement.createdAt, 'dd-MMM-yyyy HH:mm:ss')}"></td>
+                                <td>
+                                    <span th:if="${movement.movementType?.name() == 'OPENING'}" class="badge bg-info">Opening</span>
+                                    <span th:if="${movement.movementType?.name() == 'PURCHASE'}" class="badge bg-success">Purchase</span>
+                                    <span th:if="${movement.movementType?.name() == 'SALE'}" class="badge bg-primary">Sale</span>
+                                    <span th:if="${movement.movementType?.name() == 'ADJUSTMENT'}" class="badge bg-warning">Adjustment</span>
+                                    <span th:if="${movement.movementType?.name() == 'TRANSFER_IN'}" class="badge bg-info">Transfer In</span>
+                                    <span th:if="${movement.movementType?.name() == 'TRANSFER_OUT'}" class="badge bg-secondary">Transfer Out</span>
+                                    <span th:if="${movement.movementType?.name() == 'RETURN'}" class="badge bg-danger">Return</span>
+                                </td>
+                                <td class="text-end">
+                                    <strong th:text="${#numbers.formatDecimal(movement.quantity, 1, 2)}"></strong>
+                                </td>
+                                <td class="text-end" th:text="${movement.rate != null ? #numbers.formatDecimal(movement.rate, 1, 2) : 'N/A'}"></td>
+                                <td class="text-end" th:text="${movement.quantityBefore != null ? #numbers.formatDecimal(movement.quantityBefore, 1, 2) : 'N/A'}"></td>
+                                <td class="text-end">
+                                    <strong th:text="${movement.quantityAfter != null ? #numbers.formatDecimal(movement.quantityAfter, 1, 2) : 'N/A'}"></strong>
+                                </td>
+                                <td>
+                                    <span th:if="${movement.referenceType == 'purchase'}" class="text-muted">
+                                        Purchase #<span th:text="${movement.referenceId}"></span>
+                                    </span>
+                                    <span th:if="${movement.referenceType == 'sale'}" class="text-muted">
+                                        Sale #<span th:text="${movement.referenceId}"></span>
+                                    </span>
+                                    <span th:if="${movement.referenceType == 'opening_balance'}" class="text-muted">
+                                        Opening Balance
+                                    </span>
+                                    <span th:if="${movement.referenceType == 'adjustment'}" class="text-muted">
+                                        Adjustment
+                                    </span>
+                                    <span th:if="${movement.referenceType == null || movement.referenceType == ''}" class="text-muted">
+                                        N/A
+                                    </span>
+                                </td>
+                                <td th:text="${movement.createdByName ?: 'System'}"></td>
+                                <td>
+                                    <span th:if="${movement.notes != null && !#strings.isEmpty(movement.notes)}"
+                                          th:text="${movement.notes}"
+                                          class="text-truncate d-inline-block"
+                                          style="max-width: 200px;"
+                                          th:title="${movement.notes}"></span>
+                                    <span th:if="${movement.notes == null || #strings.isEmpty(movement.notes)}"
+                                          class="text-muted">-</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </th:block>
+
+    <th:block th:fragment="customJs">
+        <script>
+        </script>
+    </th:block>
+</body>
+</html>

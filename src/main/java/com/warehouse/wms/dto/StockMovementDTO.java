@@ -25,8 +25,8 @@ public class StockMovementDTO {
     private BigDecimal rate;
     private String referenceType;
     private Long referenceId;
-    private BigDecimal balanceBefore;
-    private BigDecimal balanceAfter;
+    private BigDecimal quantityBefore;
+    private BigDecimal quantityAfter;
     private String notes;
     private Long createdBy;
     private String createdByName;

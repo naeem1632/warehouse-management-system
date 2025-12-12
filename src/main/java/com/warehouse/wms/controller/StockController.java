@@ -2,7 +2,6 @@ package com.warehouse.wms.controller;
 
 import com.warehouse.wms.dto.StockCurrentDTO;
 import com.warehouse.wms.dto.StockMovementDTO;
-import com.warehouse.wms.entity.User;
 import com.warehouse.wms.entity.Warehouse;
 import com.warehouse.wms.enums.MovementType;
 import com.warehouse.wms.service.ProductService;
@@ -10,8 +9,6 @@ import com.warehouse.wms.service.StockService;
 import com.warehouse.wms.service.WarehouseService;
 import com.warehouse.wms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +29,6 @@ public class StockController {
 
     @GetMapping("/overview")
     public String stockOverview(@RequestParam(required = false) Long warehouseId,
-                               @AuthenticationPrincipal UserDetails userDetails,
                                Model model) {
         // Get accessible warehouses based on user role
         List<Warehouse> accessibleWarehouses;
@@ -131,15 +127,16 @@ public class StockController {
 
     @PostMapping("/opening-balance/save")
     public String saveOpeningBalance(@ModelAttribute StockMovementDTO dto,
-                                    @AuthenticationPrincipal User currentUser,
                                     RedirectAttributes redirectAttributes) {
         try {
             // Validate warehouse access before saving
             SecurityUtils.validateWarehouseAccess(dto.getWarehouseId());
 
+            Long currentUserId = SecurityUtils.getCurrentUserId();
+
             dto.setMovementType(MovementType.OPENING);
             dto.setReferenceType("opening_balance");
-            stockService.recordMovement(dto, currentUser.getId());
+            stockService.recordMovement(dto, currentUserId);
             redirectAttributes.addFlashAttribute("successMessage",
                 "Opening balance recorded successfully");
             return "redirect:/stock/overview?warehouseId=" + dto.getWarehouseId();

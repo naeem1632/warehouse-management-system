@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/main :: main(content=~{::content}, customCss=~{}, customJs=~{::customJs})}">
+<body>
+    <th:block th:fragment="content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h1><i class="bi bi-plus-circle"></i> Add Opening Balance</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a th:href="@{/stock/overview}">Stock Overview</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Opening Balance</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Messages -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i> <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle"></i> <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Opening Balance Form -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Opening Balance Details</h5>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/stock/opening-balance/save}" method="post" th:object="${movement}">
+                    <div class="row">
+                        <!-- Warehouse -->
+                        <div class="col-md-6 mb-3">
+                            <label for="warehouseId" class="form-label">Warehouse <span class="text-danger">*</span></label>
+                            <select class="form-select" id="warehouseId" th:field="*{warehouseId}" required>
+                                <option value="">Select Warehouse</option>
+                                <option th:each="warehouse : ${warehouses}"
+                                        th:value="${warehouse.id}"
+                                        th:text="${warehouse.name}"></option>
+                            </select>
+                        </div>
+
+                        <!-- Product -->
+                        <div class="col-md-6 mb-3">
+                            <label for="productId" class="form-label">Product <span class="text-danger">*</span></label>
+                            <select class="form-select" id="productId" th:field="*{productId}" required>
+                                <option value="">Select Product</option>
+                                <option th:each="product : ${products}"
+                                        th:value="${product.id}"
+                                        th:text="${product.name + ' (' + product.sku + ')'}"></option>
+                            </select>
+                        </div>
+
+                        <!-- Quantity -->
+                        <div class="col-md-6 mb-3">
+                            <label for="quantity" class="form-label">Opening Quantity <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="quantity" th:field="*{quantity}"
+                                   step="0.01" min="0" placeholder="Enter opening quantity" required>
+                            <small class="form-text text-muted">Enter the initial stock quantity for this product</small>
+                        </div>
+
+                        <!-- Rate (Cost per unit) -->
+                        <div class="col-md-6 mb-3">
+                            <label for="rate" class="form-label">Rate (Cost per unit) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="rate" th:field="*{rate}"
+                                   step="0.01" min="0" placeholder="Enter rate" required>
+                            <small class="form-text text-muted">Enter the cost per unit for this opening stock</small>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="col-12 mb-3">
+                            <label for="notes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="notes" th:field="*{notes}" rows="3"
+                                      placeholder="Add any additional notes or comments"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between">
+                                <a th:href="@{/stock/overview}" class="btn btn-secondary">
+                                    <i class="bi bi-x-circle"></i> Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save"></i> Save Opening Balance
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Help Card -->
+        <div class="card mt-3">
+            <div class="card-body">
+                <h6 class="card-title"><i class="bi bi-info-circle"></i> About Opening Balance</h6>
+                <p class="card-text mb-0">
+                    Use this form to set the initial stock quantity for products in your warehouse.
+                    This is typically done when starting to use the system or when adding a new product.
+                    The opening balance will be recorded as a stock movement with type "OPENING".
+                </p>
+            </div>
+        </div>
+    </th:block>
+
+    <th:block th:fragment="customJs">
+        <script>
+            // Auto-calculate total if needed in future
+            document.addEventListener('DOMContentLoaded', function() {
+                const quantityInput = document.getElementById('quantity');
+                const rateInput = document.getElementById('rate');
+
+                // Add validation or calculations here if needed
+            });
+        </script>
+    </th:block>
+</body>
+</html>

@@ -48,11 +48,11 @@ public class StockMovement {
     @Column(name = "reference_id")
     private Long referenceId;
 
-    @Column(name = "balance_before", precision = 15, scale = 3)
-    private BigDecimal balanceBefore;
+    @Column(name = "quantity_before", precision = 15, scale = 3)
+    private BigDecimal quantityBefore;
 
-    @Column(name = "balance_after", precision = 15, scale = 3)
-    private BigDecimal balanceAfter;
+    @Column(name = "quantity_after", precision = 15, scale = 3)
+    private BigDecimal quantityAfter;
 
     @Column(columnDefinition = "TEXT")
     private String notes;

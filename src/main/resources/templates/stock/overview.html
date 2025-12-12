@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/main :: main(content=~{::content}, customCss=~{}, customJs=~{::customJs})}">
+<body>
+    <th:block th:fragment="content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h1><i class="bi bi-boxes"></i> Stock Overview</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Stock Overview</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div class="col-auto">
+                    <a th:href="@{/stock/opening-balance/new}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Add Opening Balance
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Messages -->
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle"></i> <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Warehouse Filter -->
+        <div class="card mb-3">
+            <div class="card-body">
+                <form th:action="@{/stock/overview}" method="get" class="row g-3">
+                    <div class="col-md-10">
+                        <label class="form-label">Warehouse</label>
+                        <select name="warehouseId" class="form-select" onchange="this.form.submit()">
+                            <option value="">Select Warehouse</option>
+                            <option th:each="warehouse : ${warehouses}"
+                                    th:value="${warehouse.id}"
+                                    th:text="${warehouse.name}"
+                                    th:selected="${selectedWarehouseId == warehouse.id}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-funnel"></i> Filter
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Stock Table -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Current Stock (<span th:text="${#lists.size(stockList)}">0</span> items)</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Product SKU</th>
+                                <th>Product Name</th>
+                                <th>Unit</th>
+                                <th class="text-end">Current Quantity</th>
+                                <th>Last Updated</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(stockList)}">
+                                <td colspan="6" class="text-center py-4 text-muted">
+                                    <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                                    <p class="mb-0 mt-2">No stock items found. Add opening balance to get started.</p>
+                                </td>
+                            </tr>
+                            <tr th:each="stock : ${stockList}">
+                                <td><strong th:text="${stock.productSku}"></strong></td>
+                                <td th:text="${stock.productName}"></td>
+                                <td th:text="${stock.productUnit}"></td>
+                                <td class="text-end">
+                                    <strong th:text="${#numbers.formatDecimal(stock.currentQuantity, 1, 2)}"></strong>
+                                </td>
+                                <td th:text="${#temporals.format(stock.lastUpdated, 'dd-MMM-yyyy HH:mm')}"></td>
+                                <td>
+                                    <a th:href="@{/stock/movements(warehouseId=${stock.warehouseId}, productId=${stock.productId})}"
+                                       class="btn btn-sm btn-outline-info" title="View Movement History">
+                                        <i class="bi bi-clock-history"></i> History
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </th:block>
+
+    <th:block th:fragment="customJs">
+        <script>
+        </script>
+    </th:block>
+</body>
+</html>

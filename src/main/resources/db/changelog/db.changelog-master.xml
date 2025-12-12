@@ -38,4 +38,7 @@
     <!-- Purchase enhancements: payments, attachments, quantity-based, audit trail -->
     <include file="db/changelog/changes/011-add-purchase-enhancements.xml"/>
 
+    <!-- Stock movements: rename balance columns to quantity for clarity -->
+    <include file="db/changelog/changes/012-rename-stock-movement-columns.xml"/>
+
 </databaseChangeLog>
