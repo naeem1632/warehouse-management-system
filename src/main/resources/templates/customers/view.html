@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/main :: main(content=~{::content}, customCss=~{}, customJs=~{})}">
+<body><th:block th:fragment="content">
+<div class="page-header"><div class="row"><div class="col"><h1><i class="bi bi-people"></i> Customer Details</h1></div>
+<div class="col-auto"><a th:href="@{/customers/{id}/edit(id=${customer.id})}" class="btn btn-warning me-2"><i class="bi bi-pencil"></i> Edit</a>
+<a th:href="@{/customers}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back</a></div></div></div>
+<div class="card mb-3"><div class="card-header"><h5>Basic Information</h5></div><div class="card-body"><div class="row">
+<div class="col-md-6 mb-3"><h6 class="text-muted">Customer Code</h6><p class="fw-bold" th:text="${customer.code}"></p></div>
+<div class="col-md-6 mb-3"><h6 class="text-muted">Name</h6><p th:text="${customer.name}"></p></div>
+<div class="col-md-6 mb-3"><h6 class="text-muted">Contact Person</h6><p th:text="${customer.contactPerson} ?: 'N/A'"></p></div>
+<div class="col-md-6 mb-3"><h6 class="text-muted">Phone</h6><p th:text="${customer.phone}"></p></div>
+<div class="col-md-6 mb-3"><h6 class="text-muted">Email</h6><p th:text="${customer.email} ?: 'N/A'"></p></div>
+<div class="col-md-6 mb-3"><h6 class="text-muted">City</h6><p th:text="${customer.city} ?: 'N/A'"></p></div>
+<div class="col-12 mb-3"><h6 class="text-muted">Address</h6><p th:text="${customer.address} ?: 'N/A'"></p></div></div></div></div>
+<div class="card mb-3"><div class="card-header"><h5>Financial Information</h5></div><div class="card-body"><div class="row">
+<div class="col-md-4 mb-3"><h6 class="text-muted">Current Balance</h6><p><strong th:text="${customer.currentBalance != null ? #numbers.formatDecimal(customer.currentBalance, 1, 2) : '0.00'}"></strong>
+<span th:text="${customer.currentBalanceType}" class="text-muted ms-1"></span></p></div>
+<div class="col-md-4 mb-3"><h6 class="text-muted">Credit Limit</h6><p th:text="${customer.creditLimit != null ? #numbers.formatDecimal(customer.creditLimit, 1, 2) : 'N/A'}"></p></div>
+<div class="col-md-4 mb-3"><h6 class="text-muted">Payment Terms</h6><p th:text="${customer.paymentTerms} ?: 'N/A'"></p></div>
+<div class="col-12"><a th:href="@{/customers/{id}/ledger(id=${customer.id})}" class="btn btn-primary"><i class="bi bi-journal-text"></i> View Ledger</a></div></div></div></div>
+</th:block></body></html>
