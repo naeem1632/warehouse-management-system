@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/main :: main(content=~{::content}, customCss=~{}, customJs=~{})}">
+<body><th:block th:fragment="content">
+<div class="page-header"><div class="row"><div class="col"><h1><i class="bi bi-clock-history"></i> Pending Adjustments</h1></div>
+<div class="col-auto"><a th:href="@{/stock/adjustments}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> All Adjustments</a></div></div></div>
+<div class="alert alert-info" th:if="${#lists.isEmpty(adjustments)}"><i class="bi bi-info-circle"></i> No pending adjustments waiting for approval.</div>
+<div class="row"><div th:each="adj : ${adjustments}" class="col-md-6 mb-3">
+<div class="card border-warning"><div class="card-header bg-warning text-dark"><strong th:text="${adj.adjustmentNumber}"></strong>
+<small class="float-end" th:text="${#temporals.format(adj.adjustmentDate, 'dd-MMM-yyyy')}"></small></div>
+<div class="card-body"><div class="mb-2"><strong>Warehouse:</strong> <span th:text="${adj.warehouseName}"></span></div>
+<div class="mb-2"><strong>Product:</strong> <span th:text="${adj.productName}"></span> (<span th:text="${adj.productSku}"></span>)</div>
+<div class="mb-2"><strong>Type:</strong> <span class="badge bg-secondary" th:text="${adj.adjustmentType}"></span></div>
+<div class="mb-2"><strong>Quantity Before:</strong> <span th:text="${#numbers.formatDecimal(adj.quantityBefore, 1, 2)}"></span></div>
+<div class="mb-2"><strong>Adjustment:</strong>
+<span th:classappend="${adj.adjustmentQuantity.compareTo(T(java.math.BigDecimal).ZERO) >= 0} ? 'text-success' : 'text-danger'"
+      th:text="${adj.adjustmentQuantity.compareTo(T(java.math.BigDecimal).ZERO) >= 0 ? '+' : ''} + ${#numbers.formatDecimal(adj.adjustmentQuantity, 1, 2)}"></span></div>
+<div class="mb-2"><strong>Quantity After:</strong> <span class="text-primary fw-bold" th:text="${#numbers.formatDecimal(adj.quantityAfter, 1, 2)}"></span></div>
+<div class="mb-2"><strong>Reason:</strong> <small th:text="${adj.reason}"></small></div>
+<div class="mb-2"><strong>Created By:</strong> <small th:text="${adj.createdByName}"></small></div>
+</div>
+<div class="card-footer"><div class="d-flex justify-content-between">
+<form th:action="@{/stock/adjustments/{id}/reject(id=${adj.id})}" method="post" style="display:inline;"
+      onsubmit="return confirm('Reject this adjustment?');">
+<button type="submit" class="btn btn-sm btn-danger"><i class="bi bi-x-circle"></i> Reject</button></form>
+<a th:href="@{/stock/adjustments/{id}(id=${adj.id})}" class="btn btn-sm btn-info"><i class="bi bi-eye"></i> View</a>
+<form th:action="@{/stock/adjustments/{id}/approve(id=${adj.id})}" method="post" style="display:inline;"
+      onsubmit="return confirm('Approve? Stock will be updated.');">
+<button type="submit" class="btn btn-sm btn-success"><i class="bi bi-check-circle"></i> Approve</button></form>
+</div></div></div></div></div>
+</th:block></body></html>

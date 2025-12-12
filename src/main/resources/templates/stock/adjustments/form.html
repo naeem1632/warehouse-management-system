@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/main :: main(content=~{::content}, customCss=~{}, customJs=~{::customJs})}">
+<body><th:block th:fragment="content">
+<div class="page-header"><h1><i class="bi bi-clipboard-check"></i> New Stock Adjustment</h1></div>
+<form th:action="@{/stock/adjustments}" method="post" th:object="${adjustment}">
+<div class="card mb-3"><div class="card-header"><h5>Adjustment Information</h5></div><div class="card-body"><div class="row">
+<div class="col-md-4 mb-3"><label>Adjustment Date <span class="text-danger">*</span></label><input type="date" class="form-control" th:field="*{adjustmentDate}" required></div>
+<div class="col-md-4 mb-3"><label>Warehouse <span class="text-danger">*</span></label><select class="form-select" th:field="*{warehouseId}" required>
+<option value="">Select Warehouse</option><option th:each="warehouse : ${warehouses}" th:value="${warehouse.id}" th:text="${warehouse.name}"></option></select></div>
+<div class="col-md-4 mb-3"><label>Product <span class="text-danger">*</span></label><select class="form-select" th:field="*{productId}" id="productSelect" required>
+<option value="">Select Product</option><option th:each="product : ${products}" th:value="${product.id}" th:text="${product.name + ' (' + product.sku + ')'}"></option></select></div>
+<div class="col-md-4 mb-3"><label>Adjustment Type <span class="text-danger">*</span></label><select class="form-select" th:field="*{adjustmentType}" required>
+<option value="">Select Type</option><option th:each="type : ${adjustmentTypes}" th:value="${type}" th:text="${type}"></option></select></div>
+<div class="col-md-4 mb-3"><label>Adjustment Quantity <span class="text-danger">*</span></label>
+<input type="number" class="form-control" th:field="*{adjustmentQuantity}" step="0.001" placeholder="Use negative for reduction" required>
+<small class="text-muted">Positive to add, negative to reduce</small></div>
+<div class="col-md-4 mb-3"><label>Current Stock</label><input type="text" class="form-control" id="currentStock" readonly placeholder="Select product first"></div>
+<div class="col-md-12 mb-3"><label>Reason <span class="text-danger">*</span></label>
+<textarea class="form-control" th:field="*{reason}" rows="3" placeholder="Provide detailed reason for this adjustment" required></textarea></div>
+</div></div></div>
+<div class="alert alert-warning"><i class="bi bi-exclamation-triangle"></i> <strong>Note:</strong> This adjustment will be pending approval before stock is updated.</div>
+<div class="d-flex justify-content-between"><a th:href="@{/stock/adjustments}" class="btn btn-secondary"><i class="bi bi-x-circle"></i> Cancel</a>
+<button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Create Adjustment</button></div>
+</form></th:block>
+<th:block th:fragment="customJs"><script>
+// This is a placeholder for future AJAX stock lookup feature
+document.getElementById('productSelect')?.addEventListener('change',function(){
+var info=document.getElementById('currentStock');
+if(this.value){info.value='Loading...';}else{info.value='';}
+});
+</script></th:block></body></html>

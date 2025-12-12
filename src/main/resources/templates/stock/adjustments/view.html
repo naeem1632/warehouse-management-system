@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/main :: main(content=~{::content}, customCss=~{}, customJs=~{})}">
+<body><th:block th:fragment="content">
+<div class="page-header"><div class="row"><div class="col"><h1><i class="bi bi-clipboard-check"></i> Adjustment Details</h1></div>
+<div class="col-auto"><a th:href="@{/stock/adjustments}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back</a></div></div></div>
+<div class="card mb-3"><div class="card-header"><h5>Adjustment Information</h5></div><div class="card-body"><div class="row">
+<div class="col-md-6 mb-3"><h6 class="text-muted">Adjustment Number</h6><p class="fw-bold" th:text="${adjustment.adjustmentNumber}"></p></div>
+<div class="col-md-6 mb-3"><h6 class="text-muted">Adjustment Date</h6><p th:text="${#temporals.format(adjustment.adjustmentDate, 'dd-MMM-yyyy')}"></p></div>
+<div class="col-md-6 mb-3"><h6 class="text-muted">Warehouse</h6><p th:text="${adjustment.warehouseName}"></p></div>
+<div class="col-md-6 mb-3"><h6 class="text-muted">Product</h6><p><span th:text="${adjustment.productName}"></span> (<span th:text="${adjustment.productSku}"></span>)</p></div>
+<div class="col-md-6 mb-3"><h6 class="text-muted">Unit</h6><p th:text="${adjustment.productUnit}"></p></div>
+<div class="col-md-6 mb-3"><h6 class="text-muted">Adjustment Type</h6><p><span class="badge bg-secondary" th:text="${adjustment.adjustmentType}"></span></p></div>
+</div></div></div>
+<div class="card mb-3"><div class="card-header"><h5>Quantity Details</h5></div><div class="card-body"><div class="row">
+<div class="col-md-4 mb-3"><h6 class="text-muted">Quantity Before</h6><h4 th:text="${#numbers.formatDecimal(adjustment.quantityBefore, 1, 3)}"></h4></div>
+<div class="col-md-4 mb-3"><h6 class="text-muted">Adjustment</h6>
+<h4 th:classappend="${adjustment.adjustmentQuantity.compareTo(T(java.math.BigDecimal).ZERO) >= 0} ? 'text-success' : 'text-danger'"
+    th:text="${adjustment.adjustmentQuantity.compareTo(T(java.math.BigDecimal).ZERO) >= 0 ? '+' : ''} + ${#numbers.formatDecimal(adjustment.adjustmentQuantity, 1, 3)}"></h4></div>
+<div class="col-md-4 mb-3"><h6 class="text-muted">Quantity After</h6><h4 class="text-primary" th:text="${#numbers.formatDecimal(adjustment.quantityAfter, 1, 3)}"></h4></div>
+<div class="col-md-12"><h6 class="text-muted">Reason</h6><p th:text="${adjustment.reason}"></p></div>
+</div></div></div>
+<div class="card mb-3"><div class="card-header"><h5>Status & Approval</h5></div><div class="card-body"><div class="row">
+<div class="col-md-6 mb-3"><h6 class="text-muted">Status</h6><p>
+<span th:if="${adjustment.status?.name() == 'PENDING'}" class="badge bg-warning fs-6">Pending Approval</span>
+<span th:if="${adjustment.status?.name() == 'APPROVED'}" class="badge bg-success fs-6">Approved</span>
+<span th:if="${adjustment.status?.name() == 'REJECTED'}" class="badge bg-danger fs-6">Rejected</span></p></div>
+<div class="col-md-6 mb-3"><h6 class="text-muted">Created By</h6><p th:text="${adjustment.createdByName}"></p>
+<small class="text-muted" th:text="'on ' + ${#temporals.format(adjustment.createdAt, 'dd-MMM-yyyy HH:mm')}"></small></div>
+<div class="col-md-6 mb-3" th:if="${adjustment.approvedBy != null}"><h6 class="text-muted">Approved/Rejected By</h6>
+<p th:text="${adjustment.approvedByName}"></p>
+<small class="text-muted" th:text="'on ' + ${#temporals.format(adjustment.approvedAt, 'dd-MMM-yyyy HH:mm')}"></small></div>
+</div></div></div>
+<div th:if="${adjustment.status?.name() == 'PENDING'}" class="d-flex justify-content-end gap-2">
+<form th:action="@{/stock/adjustments/{id}/reject(id=${adjustment.id})}" method="post" style="display:inline;"
+      onsubmit="return confirm('Are you sure you want to reject this adjustment?');">
+<button type="submit" class="btn btn-danger"><i class="bi bi-x-circle"></i> Reject</button></form>
+<form th:action="@{/stock/adjustments/{id}/approve(id=${adjustment.id})}" method="post" style="display:inline;"
+      onsubmit="return confirm('Are you sure you want to approve this adjustment? This will update the stock.');">
+<button type="submit" class="btn btn-success"><i class="bi bi-check-circle"></i> Approve</button></form>
+</div>
+</th:block></body></html>
