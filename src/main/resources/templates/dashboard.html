@@ -89,12 +89,26 @@
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-cart-check"></i> Sales
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/sales">All Sales</a></li>
+                            <li><a class="dropdown-item" href="/sales/create">New Sale</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="bi bi-boxes"></i> Stock
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="/stock/overview">Stock Overview</a></li>
                             <li><a class="dropdown-item" href="/stock/opening-balance/new">Opening Balance</a></li>
                         </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/customers">
+                            <i class="bi bi-people"></i> Customers
+                        </a>
                     </li>
                     <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                         <a class="nav-link" href="/users">
