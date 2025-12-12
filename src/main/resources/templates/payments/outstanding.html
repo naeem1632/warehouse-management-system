@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/main :: main(content=~{::content}, customCss=~{}, customJs=~{})}">
+<body><th:block th:fragment="content">
+<div class="page-header"><h1><i class="bi bi-wallet2"></i> Outstanding Payments Dashboard</h1></div>
+<div class="row mb-4"><div class="col-md-4"><div class="card border-danger">
+<div class="card-body"><h6 class="text-danger">Total Payables (We Owe)</h6>
+<h2 class="text-danger" th:text="${#numbers.formatDecimal(totalPayables, 1, 2)}">0.00</h2>
+<small class="text-muted">Amount owed to suppliers</small></div></div></div>
+<div class="col-md-4"><div class="card border-success">
+<div class="card-body"><h6 class="text-success">Total Receivables (They Owe)</h6>
+<h2 class="text-success" th:text="${#numbers.formatDecimal(totalReceivables, 1, 2)}">0.00</h2>
+<small class="text-muted">Amount owed by customers</small></div></div></div>
+<div class="col-md-4"><div class="card" th:classappend="${netPosition.compareTo(T(java.math.BigDecimal).ZERO) >= 0} ? 'border-success' : 'border-danger'">
+<div class="card-body"><h6>Net Position</h6>
+<h2 th:classappend="${netPosition.compareTo(T(java.math.BigDecimal).ZERO) >= 0} ? 'text-success' : 'text-danger'"
+    th:text="${#numbers.formatDecimal(netPosition, 1, 2)}">0.00</h2>
+<small class="text-muted">Receivables - Payables</small></div></div></div></div>
+<div class="row"><div class="col-md-6 mb-4"><div class="card">
+<div class="card-header bg-danger text-white"><h5 class="mb-0"><i class="bi bi-arrow-up-circle"></i> Supplier Payables</h5></div>
+<div class="card-body p-0"><div class="table-responsive">
+<table class="table table-hover mb-0"><thead class="table-light"><tr><th>Supplier</th><th>Code</th><th class="text-end">Outstanding</th><th>Actions</th></tr></thead><tbody>
+<tr th:if="${#lists.isEmpty(suppliers)}"><td colspan="4" class="text-center py-4">No outstanding payables</td></tr>
+<tr th:each="supplier : ${suppliers}" th:if="${supplier.currentBalanceType == 'DEBIT'}">
+<td><strong th:text="${supplier.name}"></strong></td>
+<td><small class="text-muted" th:text="${supplier.code}"></small></td>
+<td class="text-end"><strong class="text-danger" th:text="${#numbers.formatDecimal(supplier.currentBalance, 1, 2)}"></strong></td>
+<td><a th:href="@{/supplier-payments/create(supplierId=${supplier.id})}" class="btn btn-sm btn-outline-primary" title="Make Payment">
+<i class="bi bi-cash-coin"></i> Pay</a>
+<a th:href="@{/suppliers/{id}/ledger(id=${supplier.id})}" class="btn btn-sm btn-outline-info" title="View Ledger">
+<i class="bi bi-journal-text"></i></a></td></tr>
+</tbody></table></div></div></div></div>
+<div class="col-md-6 mb-4"><div class="card">
+<div class="card-header bg-success text-white"><h5 class="mb-0"><i class="bi bi-arrow-down-circle"></i> Customer Receivables</h5></div>
+<div class="card-body p-0"><div class="table-responsive">
+<table class="table table-hover mb-0"><thead class="table-light"><tr><th>Customer</th><th>Code</th><th class="text-end">Outstanding</th><th>Actions</th></tr></thead><tbody>
+<tr th:if="${#lists.isEmpty(customers)}"><td colspan="4" class="text-center py-4">No outstanding receivables</td></tr>
+<tr th:each="customer : ${customers}" th:if="${customer.currentBalanceType == 'DEBIT'}">
+<td><strong th:text="${customer.name}"></strong></td>
+<td><small class="text-muted" th:text="${customer.code}"></small></td>
+<td class="text-end"><strong class="text-success" th:text="${#numbers.formatDecimal(customer.currentBalance, 1, 2)}"></strong></td>
+<td><a th:href="@{/customer-payments/create(customerId=${customer.id})}" class="btn btn-sm btn-outline-success" title="Receive Payment">
+<i class="bi bi-receipt"></i> Receive</a>
+<a th:href="@{/customers/{id}/ledger(id=${customer.id})}" class="btn btn-sm btn-outline-info" title="View Ledger">
+<i class="bi bi-journal-text"></i></a></td></tr>
+</tbody></table></div></div></div></div></div>
+</th:block></body></html>

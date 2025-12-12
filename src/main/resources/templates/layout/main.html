@@ -77,6 +77,20 @@
                             <li><a class="dropdown-item" th:href="@{/stock/opening-balance/new}">Opening Balance</a></li>
                         </ul>
                     </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" th:classappend="${#strings.equals(activePage, 'payments')} ? 'active' : ''">
+                            <i class="bi bi-wallet2"></i> Payments
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" th:href="@{/payments/outstanding}">Outstanding Payments</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" th:href="@{/supplier-payments}">Supplier Payments</a></li>
+                            <li><a class="dropdown-item" th:href="@{/supplier-payments/create}">Pay Supplier</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" th:href="@{/customer-payments}">Customer Payments</a></li>
+                            <li><a class="dropdown-item" th:href="@{/customer-payments/create}">Receive Payment</a></li>
+                        </ul>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" th:href="@{/customers}" th:classappend="${#strings.equals(activePage, 'customers')} ? 'active' : ''">
                             <i class="bi bi-people"></i> Customers
