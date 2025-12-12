@@ -94,20 +94,6 @@ public class StockController {
         return "stock/low-stock";
     }
 
-    @GetMapping("/movements")
-    public String stockMovements(@RequestParam Long warehouseId,
-                                 @RequestParam Long productId,
-                                 Model model) {
-        // Validate warehouse access
-        SecurityUtils.validateWarehouseAccess(warehouseId);
-
-        List<StockMovementDTO> movements = stockService.getMovementHistory(warehouseId, productId);
-        model.addAttribute("movements", movements);
-        model.addAttribute("product", productService.getProductById(productId));
-        model.addAttribute("warehouse", warehouseService.getWarehouseById(warehouseId));
-        return "stock/movements";
-    }
-
     @GetMapping("/opening-balance/new")
     public String newOpeningBalanceForm(Model model) {
         // Get accessible warehouses based on user role
