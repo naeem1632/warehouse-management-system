@@ -47,4 +47,7 @@
     <!-- Sales management: sales and sale_items tables -->
     <include file="db/changelog/changes/014-create-sales-and-sale-items.xml"/>
 
+    <!-- Payment tracking: supplier_payments and customer_payments tables -->
+    <include file="db/changelog/changes/015-create-supplier-payments-and-customer-payments.xml"/>
+
 </databaseChangeLog>
